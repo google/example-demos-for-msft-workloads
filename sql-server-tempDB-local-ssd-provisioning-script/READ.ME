@@ -1,0 +1,68 @@
+##Original author: Anibal Santiago @anibals
+
+drive.web-frontend_20230222.00_p0
+create-local-ssd-stripe-set-README.txt
+## Commands to test the startup script that configures all Local SSDs
+## as a RAID-0 (stripe set)
+
+# List of SQL Server images
+# gcloud compute images list | grep sql
+
+## Create an instance with a boot disk of 250GB and 4 Local SSDs
+## NOTE: File "create-local-ssd-stripe-set.ps1" must exist in current folder
+gcloud compute instances create sqlserver-test \
+  --machine-type n1-highmem-32 \
+  --boot-disk-type pd-ssd \
+  --boot-disk-size 250GB \
+  --local-ssd interface=nvme \
+  --local-ssd interface=nvme \
+  --local-ssd interface=nvme \
+  --local-ssd interface=nvme \
+  --image-project windows-sql-cloud \
+  --image-family sql-std-2019-win-2019 \
+  --zone us-east1-b \
+  --network default \
+  --metadata-from-file windows-startup-script-ps1="create-local-ssd-stripe-set.ps1"
+
+
+## Wait for instance to be created by checking the serial port output
+## Look for the text "Finished running startup scripts" 
+## Then press Ctrl-C to exit this command
+gcloud compute instances tail-serial-port-output sqlserver-test --zone us-east1-b
+
+
+## Generate a Windows password
+gcloud compute reset-windows-password sqlserver-test --zone us-east1-b --quiet
+
+
+## Connect to the VM using an RDP client
+1) Connect to SQL Server and validate the Tempdb is in the LocalSSD stripe set
+2) Change SQL Server service to "manual" start to let the startup script be the one that starts SQL Server
+   This is needed as SQL Server may try to start before the startup script creates the Z:\SQLData
+   and Z:\SQLLog folders.
+3) Shutdown the VM by running this command as Administrator: shutdown /s /f 
+   Wait until the instance show as stopped in the GCP console
+
+
+# You can now Edit the VM and change the startup script
+#  It is under "Custom metadata". You will see the "windows-startup-script-ps1"
+#  The section that moves the Tempdb does not need to run every time and can be commented
+#  You may want to keep the command that starts SQL Server
+
+
+## Start the VM again
+gcloud compute instances start sqlserver-test --zone us-east1-b --quiet
+
+
+## Wait again for the text "Finished running startup scripts" in the serial port
+## output, then press Ctrl-C to stop this command
+gcloud compute instances tail-serial-port-output sqlserver-test --zone us-east1-b
+
+
+## Connect to the VM again using an RDP client
+1) Validate that the Tempdb is once again created in the LocalSSD stripe set
+   You can run the command: sqlcmd -S. -E -Q "exec sp_helpdb Tempdb"
+
+
+## Delete the VM once you are done testing
+# gcloud compute instances delete sqlserver-test --zone us-east1-b --quiet
