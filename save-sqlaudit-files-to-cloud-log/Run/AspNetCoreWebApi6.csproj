@@ -1,0 +1,25 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+
+  <PropertyGroup>
+    <TargetFramework>net6.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.CSharp" Version="4.7.0" />
+    <PackageReference Include="CloudNative.CloudEvents.NewtonsoftJson" Version="2.1.0" />
+    <PackageReference Include="Swashbuckle.AspNetCore" Version="6.2.3" />
+    <PackageReference Include="Google.Apis" Version="1.61.0" />
+    <PackageReference Include="Google.Apis.Auth" Version="1.61.0" />
+    <PackageReference Include="Google.Apis.Auth.AspNetCore3" Version="1.61.0" />
+    <PackageReference Include="Google.Apis.Drive.v3" Version="1.61.0.3082" />
+    <PackageReference Include="Google.Events.Protobuf" Version="1.0.0" />
+    <PackageReference Include="Google.Cloud.Storage.V1" Version="4.1.0" />
+    <PackageReference Include="Google.Cloud.PubSub.V1" Version="3.2.0" />
+    <PackageReference Include="Microsoft.SqlServer.XEvent.XELite" Version="2021.12.12.2" />
+    <PackageReference Include="Google.Cloud.Logging.V2" Version="4.0.0" />
+    <PackageReference Include="Google.Cloud.Audit" Version="2.1.0" />    
+  </ItemGroup>
+
+</Project>
