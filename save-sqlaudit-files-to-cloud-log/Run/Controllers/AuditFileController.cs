@@ -3,6 +3,7 @@ using Microsoft.SqlServer.XEvent.XELite;
 using Google.Cloud.Logging.V2;
 using Google.Cloud.Storage.V1;
 using Newtonsoft.Json.Linq;
+using System.Text.Json;
 
 namespace AspNetCoreWebApi6.Controllers
 {
@@ -22,9 +23,9 @@ namespace AspNetCoreWebApi6.Controllers
             _configuration = configuration;
             _logger = logger;
 
-            projectId = Environment.GetEnvironmentVariable("PROJECT_ID") ?? "";
+            projectId = _configuration["PROJECT_ID"] ?? "";
 
-            logId = Environment.GetEnvironmentVariable("LOG_ID") ?? "";
+            logId = _configuration["LOG_ID"] ?? "";
 
             fieldMapping = new Dictionary<string, string>() {
                         {"class_type", "auditClass"},
@@ -49,24 +50,17 @@ namespace AspNetCoreWebApi6.Controllers
         
         [HttpPost()]
         //public IEnumerable<AuditFile> Get(string fileName)
-        public async Task<IActionResult> Post()        
+        public async Task<IActionResult> Post([FromBody] JsonElement body)
         {            
             string settingsFileName = (Environment.GetEnvironmentVariable("SETTINGS_FILENAME") ?? "mySettings.json");
             string topicId = Environment.GetEnvironmentVariable("TOPIC_ID") ?? "";
             bool publishToPubSub = bool.Parse(Environment.GetEnvironmentVariable("DO_PUBSUB_PUBLISH") ?? "false");            
             int batchSize = Int32.Parse(Environment.GetEnvironmentVariable("BATCH_SIZE") ?? "1000");
-            string nowString = ((DateTimeOffset)DateTime.UtcNow).ToString("yyyyMMddHHmmssfff");
+            string nowString = ((DateTimeOffset)DateTime.UtcNow).ToString("yyyyMMddHHmmssfff");            
+            string uuidString = (Guid.NewGuid()).ToString();
             
-            string body = string.Empty; 
-            using (var reader = new StreamReader(Request.Body))
-            {
-                body = await reader.ReadToEndAsync();
-            }
-
-            JObject rss = JObject.Parse(body);
-            
-            var bucketName = (string?)rss["bucket"];
-            var uploadedFileName = (string?)rss["name"];
+            var bucketName = body.GetProperty("bucket").GetString();
+            var uploadedFileName = body.GetProperty("name").GetString();
 
             if (string.IsNullOrWhiteSpace(uploadedFileName)) {
                 var errMessage = "400 Bad Request. The name element in the post request cannot be empty.";
@@ -82,22 +76,27 @@ namespace AspNetCoreWebApi6.Controllers
                 return result;
             }
 
-            var destination = uploadedFileName.Replace('/', '_');
-
             var storage = StorageClient.Create();
-            using var auditLocalFilePath = System.IO.File.OpenWrite(destination);
-            storage.DownloadObject(bucketName, uploadedFileName, auditLocalFilePath);
-            auditLocalFilePath.Close();
-            
+            var localSettingsFile = uuidString + "_" + settingsFileName;
 
-            using var configFileLocalPath = System.IO.File.OpenWrite(settingsFileName);
-            storage.DownloadObject(bucketName, "config/"+settingsFileName, configFileLocalPath);
-            configFileLocalPath.Close();
-            
-            IConfigurationBuilder builder = new ConfigurationBuilder().AddJsonFile(configFileLocalPath.Name, true);
+            using (var configFileLocalPath = System.IO.File.OpenWrite(localSettingsFile))
+                {
+                    storage.DownloadObject(bucketName, "config/"+settingsFileName, configFileLocalPath);                    
+                    configFileLocalPath.Close();
+                }
+
+            IConfigurationBuilder builder = new ConfigurationBuilder().AddJsonFile(localSettingsFile, true);
             IConfigurationRoot cfg = builder.Build();
 
-            XEFileEventStreamer XEReadStream = new XEFileEventStreamer(auditLocalFilePath.Name);
+            var localAuditFile = uuidString + "_" + uploadedFileName.Replace('/', '_');
+            
+            using (var auditLocalFilePath = System.IO.File.OpenWrite(localAuditFile))
+            {
+                storage.DownloadObject(bucketName, uploadedFileName, auditLocalFilePath);
+                auditLocalFilePath.Close();
+            }
+
+            XEFileEventStreamer XEReadStream = new XEFileEventStreamer(localAuditFile);
             
             await XEReadStream.ReadEventStream(
                 () => {
@@ -127,8 +126,8 @@ namespace AspNetCoreWebApi6.Controllers
                     if (logEntries.Count>0)
                         Utils.WriteMessageToLog(projectId, logId, loggingServiceV2Client, uploadedFileName, _logger, logEntries);
                 });
-            System.IO.File.Delete(auditLocalFilePath.Name);
-            System.IO.File.Delete(configFileLocalPath.Name);
+            System.IO.File.Delete(localAuditFile);
+            System.IO.File.Delete(localSettingsFile);
             return Ok();
         }
     }
