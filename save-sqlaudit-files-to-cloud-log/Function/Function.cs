@@ -108,10 +108,13 @@ namespace SqlAuditToCloudLog
 
         private void WriteMessageToLog(LoggingServiceV2Client loggingServiceV2Client, string fileName, List<LogEntry> logEntries)
         {
-            var fileLabel = fileName.Substring(0,fileName.IndexOf("_Audit"));
 
+            var fileLabel = fileName;
             var logName = new LogName(projectId, logId);
-            
+
+            if (fileName.Contains("_Audit"))
+                fileLabel = fileName.Substring(0,fileName.IndexOf("_Audit"));
+
             MonitoredResource resource = new MonitoredResource
             {
                 Type = "global"
@@ -142,8 +145,12 @@ namespace SqlAuditToCloudLog
 
         private void ProcessXEventMessageToEntriesList(LoggingServiceV2Client loggingServiceV2Client, string fileName, IXEvent xEvent, IConfigurationRoot cfg, List<LogEntry> logEntries)
         {            
-            var fileLabel = fileName.Substring(0,fileName.IndexOf("_Audit"));
+
+            var fileLabel = fileName;
             var logName = new LogName(projectId, logId);
+
+            if (fileName.Contains("_Audit"))
+                fileLabel = fileName.Substring(0,fileName.IndexOf("_Audit"));
                         
             LogEntry logEntry = new LogEntry();            
             logEntry.LogNameAsLogName = logName;
