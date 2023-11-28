@@ -58,9 +58,12 @@ namespace AspNetCoreWebApi6
             IConfiguration cfg,
             List<LogEntry> logEntries)
         {            
-            var fileLabel = fileName.Substring(0,fileName.IndexOf("_Audit"));
+            var fileLabel = fileName;
             var logName = new LogName(projectId, logId);
                         
+            if (fileName.Contains("_Audit"))
+                fileLabel = fileName.Substring(0,fileName.IndexOf("_Audit"));
+
             LogEntry logEntry = new LogEntry();            
             logEntry.LogNameAsLogName = logName;
             logEntry.Severity = LogSeverity.Info;            
@@ -95,9 +98,11 @@ namespace AspNetCoreWebApi6
             ILogger _logger,
             List<LogEntry> logEntries)
         {
-            var fileLabel = fileName.Substring(0,fileName.IndexOf("_Audit"));
-
+            var fileLabel = fileName;
             var logName = new LogName(projectId, logId);
+            
+            if (fileName.Contains("_Audit"))
+                fileLabel = fileName.Substring(0,fileName.IndexOf("_Audit"));
             
             MonitoredResource resource = new MonitoredResource
             {
