@@ -1,0 +1,8 @@
+gcloud compute instance-templates create /
+    app-server-tpl --machine-type=<INSERT MACHINE TYPE> /
+    --network-interface=subnet=<INSERT SUBNET SELFLINK>,no-address /
+    --metadata=enable-oslogin=false --maintenance-policy=MIGRATE /
+    --provisioning-model=STANDARD --service-account=<INSERT SERVICE ACCOUNT> /
+    --scopes=https://www.googleapis.com/auth/cloud-platform --region=<INSERT REGION> /
+    --create-disk=auto-delete=yes,boot=yes,image=projects/windows-cloud/global/images/windows-server-2022-dc-v20231011,mode=rw,size=50,type=pd-balanced /
+    --reservation-affinity=any
