@@ -30,6 +30,7 @@ Failover
 5. Navigate to the dr folder
 6. Run terraform apply to recover the VMs in the DR region
 7. Validate all servers and applications are back online
+8. Delete the old production VMs and their disks
 
 ***If not using a domain controller, you will need to comment out lines 26-32 in dr-east-async-rep.tf and lines 18, 54 to 88 in dr-east-sec-boot-disks.tf.***
 
