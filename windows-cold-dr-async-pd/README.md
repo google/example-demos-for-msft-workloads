@@ -5,7 +5,7 @@ This code will facilitate the creation of 10 VMs, a DR failover, and a failback.
 VPC networks, subnets, VPC peerings, and Cloud DNS configuration is not provided with this code at this time.
 
 ### Assumptions for this repo
-You have a project for production, a project for DR, and separate VPCs to accomodate each environment using the same IP range.  This solution requires an architecture similar to this:
+You have a project for production, a project for DR, and separate VPCs to accomodate each environment using the same IP range.  This solution requires an architecture similar to this (on premises components fully optional):
 
 ![Windows Cold DR with PD Async Replication](./images/Windows%20Cold%20DR%20Architecture.png)
 
