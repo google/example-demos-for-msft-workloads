@@ -5,9 +5,9 @@ This code will facilitate the creation of 10 VMs, a DR failover, and a failback.
 VPC networks, subnets, VPC peerings, and Cloud DNS configuration is not provided with this code at this time.
 
 ### Assumptions for this repo
-You have a project for production, a project for DR, and VPCs to accomodate each environment.  This solution requires a network architecture similar to this:
+You have a project for production, a project for DR, and separate VPCs to accomodate each environment using the same IP range.  This solution requires an architecture similar to this:
 
-
+![Windows Cold DR with PD Async Replication](/Users/bkudzia/Downloads/Windows Cold DR Architecture.png)
 
 ## Setup Folder
 Contains code to spin up 10 Windows Server servers and join them to a domain, create secondary disks for all 10 and the domain controller (if using) in the DR region, and create the asynchronous replication pairs for all secondary disks.  The code is written to preserve IP addresses for DR.  
