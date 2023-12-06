@@ -2,9 +2,11 @@
 
 This code will facilitate the creation of 10 VMs, a DR failover, and a failback.  The Domain Controller was built manually to support this solution, but code is available for the secondary disk and replication.  This is not required unless you wish to test Domain Controller DR.
 
-VPC network, subnet, peerings, and Cloud DNS setup is not provided with this code at this time.
+VPC networks, subnets, VPC peerings, and Cloud DNS configuration is not provided with this code at this time.
 
 ### Assumptions for this repo
+You have a project for production, a project for DR, and VPCs to accomodate each environment.  This solution requires a network architecture similar to this:
+
 
 
 ## Setup Folder
