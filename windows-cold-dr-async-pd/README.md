@@ -7,7 +7,7 @@ VPC networks, subnets, VPC peerings, and Cloud DNS configuration is not provided
 ### Assumptions for this repo
 You have a project for production, a project for DR, and separate VPCs to accomodate each environment using the same IP range.  This solution requires an architecture similar to this (on premises components fully optional):
 
-![Windows Cold DR with PD Async Replication](./images/Windows%20Cold%20DR%20Architecture.png)
+![Windows Cold DR with PD Async Replication](./images/Cold%20DR%20with%20PD%20Replication.png)
 
 ## Setup Folder
 Contains code to spin up 10 Windows Server servers and join them to a domain, create secondary disks for all 10 and the domain controller (if using) in the DR region, and create the asynchronous replication pairs for all secondary disks.  The code is written to preserve IP addresses for DR.  
