@@ -5,7 +5,7 @@ This code will facilitate the creation of 10 VMs, a DR failover, and a failback.
 VPC networks, subnets, VPC peerings, and Cloud DNS configuration is not provided with this code at this time.
 
 ### Assumptions for this repo
-You have a project for production, a project for DR, and separate VPCs to accomodate each environment using the same IP range.  This solution requires an architecture similar to this (on premises components fully optional):
+You have a project for production, a project for DR, and separate VPCs to accomodate each environment ***using the same IP range***.  This solution requires an architecture similar to this (on premises components fully optional):
 
 ![Windows Cold DR with PD Async Replication](./images/Windows%20Cold%20DR%20Architecture.png)
 
@@ -27,7 +27,7 @@ Contains code to spin up failback/production servers using the replicated second
     - If using your own systems with larger disks, initial replication time may be longer. The initial replication is complete when the disk/async_replication/time_since_last_replication metric is available in Cloud Monitoring.
 5. Populate DR and Failback folder .tfvars files with repsective values
 
-*** If not using a domain controller, you will need to comment out lines 26-32 in prod-async-rep.tf and lines 54 to 87 in prod-sec-boot-disks.tf. ***
+***If not using a domain controller, you will need to comment out lines 26-32 in prod-async-rep.tf and lines 54 to 87 in prod-sec-boot-disks.tf.***
 
 # Failover
 1. Simulate DR event (shut down the VMs)
@@ -39,7 +39,7 @@ Contains code to spin up failback/production servers using the replicated second
 7. Validate all servers and applications are back online
 8. Delete the old production VMs and their disks
 
-*** If not using a domain controller, you will need to comment out lines 26-32 in dr-east-async-rep.tf and lines 18, 54 to 88 in dr-east-sec-boot-disks.tf. ***
+***If not using a domain controller, you will need to comment out lines 26-32 in dr-east-async-rep.tf and lines 18, 54 to 88 in dr-east-sec-boot-disks.tf.***
 
 # Failback
 1. Navigate to the dr folder
@@ -55,4 +55,4 @@ Contains code to spin up failback/production servers using the replicated second
 9. Run `terraform apply` to recover your VMs in the original production region
 10. Validate all servers and applications are back online
 
-*** If not using a domain controller, you will need to comment out lines 26-32 in dr-east-async-rep.tf and lines 18, 54 to 88 in dr-east-sec-boot-disks.tf. ***
+***If not using a domain controller, you will need to comment out lines 26-32 in dr-east-async-rep.tf and lines 18, 54 to 88 in dr-east-sec-boot-disks.tf.***
