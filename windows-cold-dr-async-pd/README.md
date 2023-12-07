@@ -29,7 +29,7 @@ Contains code to spin up failback/production servers using the replicated second
 
 *** If not using a domain controller, you will need to comment out lines 26-32 in prod-async-rep.tf and lines 54 to 87 in prod-sec-boot-disks.tf. ***
 
-Failover
+# Failover
 1. Simulate DR event (shut down the VMs)
 2. Navigate to the setup folder and rename `prod-async-rep.tf` to `prod-async-rep.tf.dr`
 3. Run terraform apply to terminate replication
@@ -41,7 +41,7 @@ Failover
 
 *** If not using a domain controller, you will need to comment out lines 26-32 in dr-east-async-rep.tf and lines 18, 54 to 88 in dr-east-sec-boot-disks.tf. ***
 
-For Failback
+# For Failback
 1. Navigate to the dr folder
 2. Rename `dr-east-async-rep.tf.dr` to `dr-east-async-rep.tf`
 3. Rename `dr-east-sec-boot-disks.tf.dr` to `dr-east-sec-boot-disks.tf`
