@@ -41,7 +41,7 @@ Contains code to spin up failback/production servers using the replicated second
 
 *** If not using a domain controller, you will need to comment out lines 26-32 in dr-east-async-rep.tf and lines 18, 54 to 88 in dr-east-sec-boot-disks.tf. ***
 
-# For Failback
+# Failback
 1. Navigate to the dr folder
 2. Rename `dr-east-async-rep.tf.dr` to `dr-east-async-rep.tf`
 3. Rename `dr-east-sec-boot-disks.tf.dr` to `dr-east-sec-boot-disks.tf`
