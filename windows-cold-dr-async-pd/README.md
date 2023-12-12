@@ -9,7 +9,7 @@ VPC networks, subnets, VPC peerings, and Cloud DNS configuration is not provided
  - As of 12/12/2023, managed services like Cloud SQL and networking products like Private Service Connect have not been tested.
  - During a DR event, it is your responsibility to ensure no connectivity is flowing into the production environment.
  - This was designed with Shared VPC use in mind.  It is your responsibility to ensure all permissions and subnets are assigned pre-DR.
- - There are projects for production, projects for DR, and separate Shared VPCs to accomodate each environment ***using the same IP range***.  This solution requires an architecture similar to this (on premises components fully optional):
+ - There are service projects for production, service projects for DR, and separate Shared VPCs to accomodate each environment ***using the same IP range***.  This solution requires an architecture similar to this (on premises components fully optional):
 
 ![Windows Cold DR with PD Async Replication](./images/Windows%20Cold%20DR%20Architecture.png)
 
