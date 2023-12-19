@@ -7,7 +7,7 @@ VPC networks, subnets, VPC peerings, and Cloud DNS configuration is not provided
 ### Assumptions for this repo
  - This is designed for region to region failover -- if a single zone is having issues, there might be better options.
  - As of 12/12/2023, managed services like Cloud SQL and networking products like Private Service Connect have not been tested.
- - During a DR event, it is your responsibility to ensure no connectivity is flowing into the production environment. This solution does not cover any move of external IP addresses, or load balancing, etc.
+ - During a DR event, it is your responsibility to ensure no connectivity is flowing into the production environment. This solution does not cover any move of external IP addresses or load balancing, nor egress from the DR VPC.
    - Public IPs may or may not change depending on the presence and specifics of web-facing apps, internet access specifics, security services, etc.
  - This was designed with Shared VPC use in mind.  It is your responsibility to ensure all permissions and subnets are assigned pre-DR.
  - Each production region will require its own Shared VPC due to the VPC Peering requirement.  You may opt for a single DR Shared VPC, but could also have mulitple DR Shared VPCs to mirror production.
