@@ -71,11 +71,14 @@ def fn_restore_log(cloud_event):
     
     uri="gs://"+source_bucket_name+"/"+object_name
     database_name = (object_name.split("/")[-1]).split(separator)[int(database_name_group_position)-1]
-    backup_type = "TLOG"
     
     if object_name.lower().startswith("full/"):
         backup_type = "FULL"
-    
+    elif object_name.lower().startswith("diff/"):
+        backup_type = "DIFF"
+    else:
+        backup_type = "TLOG"
+        
     while log_file_processed == False:
 
         request_attempts += 1

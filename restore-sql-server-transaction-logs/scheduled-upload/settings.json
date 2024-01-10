@@ -1,0 +1,10 @@
+{
+    "DateTimeFormat":  "yyyy-MM-dd HH:mm:ss.fff",
+    "BucketName":  "<your-bucket-name>",
+    "BucketUploadFolder":  "uploaded",
+    "GoogleAccountKeyFile":  "<full-path-to-the-key-file>",
+    "LocalPathForBackupFiles":  "<full-path-to-the-backup-files>",
+    "LastRunMaxWriteDateTimeUtc":  "",
+    "LastRunTimeUtc":  "",
+    "LastRunUploadedObjectsNumber":  0
+}
