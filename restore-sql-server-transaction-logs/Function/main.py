@@ -79,6 +79,12 @@ def fn_restore_log(cloud_event):
     else:
         backup_type = "TLOG"
         
+
+    if object_name.lower().find("recovery/") != -1:    
+        noRecovery = "false"
+    else:
+        noRecovery = "true"
+
     while log_file_processed == False:
 
         request_attempts += 1
@@ -92,13 +98,12 @@ def fn_restore_log(cloud_event):
                     "database": database_name,
                     "bakImportOptions": {
                             "bakType": backup_type,
-                            "noRecovery": "true",
+                            "noRecovery": noRecovery,
                         }
                 }
             }
             
             logger.info(f"Attempt to process object {object_name}. Try {request_attempts} out of {max_request_attempts}...")
-
 
             request = service.instances().import_(project=project_id, instance=instance_id, body=instances_import_request_body)
             response = request.execute()
