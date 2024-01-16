@@ -50,7 +50,7 @@ Once the request is made, the progress of the restore operation is checked perio
 
 
 
-The function can also be used to restore full and differential backup files. To achieve this functionality, these files have to be uploaded to the "full" respective "diff" top level folders in the bucket.
+The function can also be used to restore full and differential backup files. To achieve this functionality, these files have to be uploaded to the "full" respective "diff" top level folders in the bucket. By default, the function restores backups with the norecovery option, leaving the database in a state to expect further sequential restores. If the recovery option is needed for example switching to the DR instance - simply create a "recovery" folder and upload the last log backup to that folder. This will trigger the recovery option and leave the database in the accessible state.
 
 
 This repository also contains a powershell script for regularly uploading new files to cloud storage. The command to create a scheduled task in Windows to run it on a regular basis. For example, the scheduled task below script starts execution at 2:45 PM and runs every 5 minutes.
@@ -75,7 +75,12 @@ The function must have defined a set of environment variables defined in the env
 
 1. The transaction log backup files are uploaded on a continuous, regular and batched manner to the cloud storage bucket. Ideally ordered.
 
+1. There special keyword folders in the bucket as follows:
 
+    - all files under the top full folder will be treated as full backups
+    - all files under the top diff folder will be treated as diff backups
+    - any other files are treated as transaction log backups
+    - all files under the recovery folder (wheter this folder is situated at the top level or nested under full or diff or any other folders) will be restored with the recovery option.
 
 1. The files should follow a consistent naming scheme that includes certain elements. For example, an element describing the database name distinguishable by separators. The underscore character can be used as a separator"_". The function expects the separator and in the FILE_NAME_SEPARATOR respectively the DB_NAME_GROUP_POSITION environment variables. The DB_NAME_GROUP_POSITION works as a 1-based index, from left to right. 
 
@@ -108,9 +113,11 @@ The values for the FILE_NAME_SEPARATOR and DB_NAME_GROUP_POSITION look like this
 ## References
 
 
-
 * [Eventarc triggers](https://cloud.google.com/functions/docs/calling/eventarc)
 
 * [Deploy a Cloud Function](https://cloud.google.com/functions/docs/deploy)
 
 * [Import data from a BAK file to Cloud SQL for SQL Server](https://cloud.google.com/sql/docs/sqlserver/import-export/import-export-bak#import_data_from_a_bak_file_to)
+
+* [Recovery and the transaction log](https://learn.microsoft.com/en-us/sql/relational-databases/backup-restore/restore-and-recovery-overview-sql-server?view=sql-server-ver16#TlogAndRecovery)
+
