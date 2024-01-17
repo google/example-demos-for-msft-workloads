@@ -162,13 +162,12 @@ def fn_restore_log(cloud_event):
                         if processed_bucket_name:
                             try:
                                 processed_bucket = storage_client.bucket(processed_bucket_name)
-                                destination_generation_match_precondition = 0
                                                         
                                 blob_copy = source_bucket.copy_blob(
                                         source_object,
                                         processed_bucket,
                                         object_name,
-                                        if_generation_match=destination_generation_match_precondition
+                                        if_generation_match=None
                                     )
 
                                 if blob_copy is None:
