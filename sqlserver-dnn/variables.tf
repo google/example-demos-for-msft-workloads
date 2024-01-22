@@ -109,11 +109,11 @@ variable "dnn_listener_port" {
 
 variable "database_backup_url" {
   description = "The direct download URL for the Sample Database"
-  default     = "ADD_URL"
+  default     = "https://github.com/google/msft-on-gcp-code-samples/tree/sql-server-dnn/sqlserver-dnn/files/ContosoUniversity.bak"
 
 }
 
 variable "website_url" {
   description = "The direct download URL for the Sample Web App"
-  default     = "ADD_URL"
+  default     = "https://github.com/google/msft-on-gcp-code-samples/tree/sql-server-dnn/sqlserver-dnn/files/samplewebapp.zip"
 }
