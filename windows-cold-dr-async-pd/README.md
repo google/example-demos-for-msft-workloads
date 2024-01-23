@@ -1,6 +1,6 @@
 # Windows Cold DR using PD Async Replication
 
-This code will facilitate the creation of 10 VMs that will auto-join a domain, a DR failover, and a failback.  The domain controller was built manually to support this solution, and should be created first if wishing to test with one.  This repo contains the code to build the secondary boot disk and establish the asyncrhonous replication for the manually created domain controller.  This solution uses [Persisten Disk Asynchrnous Replication](https://cloud.google.com/compute/docs/disks/async-pd/about), and requires the use of a machine template to faciliate the creation of Windows servers.  A sample gcloud command is included in setup\templatefiles.
+This code will facilitate the creation of 10 VMs that will auto-join a domain, a DR failover, and a failback.  The domain controller was built manually to support this solution, and should be created first if wishing to test with one.  This repo contains the code to build the secondary boot disk and establish the asyncrhonous replication for the manually created domain controller.  This solution uses [Persistent Disk Asynchronous Replication](https://cloud.google.com/compute/docs/disks/async-pd/about), and requires the use of a machine template to faciliate the creation of Windows servers.  A sample gcloud command is included in setup\templatefiles.
 
 VPC networks, subnets, peerings, and Cloud DNS configurations are not provided with this code at this time, but can be referenced in the architecture diagram below.
 
