@@ -78,9 +78,9 @@ Contains code to spin up failback/production servers using the replicated disks 
 # Future DR and Failback Events
 In the case of future DR events, you would follow the steps in the _DR Failover_ section, with the following exceptions:
 
-2. Navigate to the ~~\setup~~\failback folder and rename ~~`prod-async-rep.tf` to `prod-async-rep.tf.dr`~~`restage-dr-async-rep.tf` to `restage-dr-async-rep.tf.failback`
-9. Rename ~~`stage-failback-async-boot-disks.tf.dr` to `stage-failback-async-boot-disks.tf` and~~`stage-failback-async-rep.tf.dr` to `stage-failback-async-rep.tf`
+2. Navigate to the ~~\setup~~ \failback folder and rename ~~`prod-async-rep.tf` to `prod-async-rep.tf.dr`~~ `restage-dr-async-rep.tf` to `restage-dr-async-rep.tf.failback`
+9. Rename ~~`stage-failback-async-boot-disks.tf.dr` to `stage-failback-async-boot-disks.tf` and~~ `stage-failback-async-rep.tf.dr` to `stage-failback-async-rep.tf`
 
 And similary, to failback, you would follow the steps in the _Production Failback_ section, with the following exceptions:
 
-10. Rename ~~`restage-dr-async-boot-disks.tf.failback` to `restage-dr-async-boot-disks.tf` and~~`restage-dr-async-rep.tf.failback` to `restage-dr-async-rep.tf`
+10. Rename ~~`restage-dr-async-boot-disks.tf.failback` to `restage-dr-async-boot-disks.tf` and~~ `restage-dr-async-rep.tf.failback` to `restage-dr-async-rep.tf`
