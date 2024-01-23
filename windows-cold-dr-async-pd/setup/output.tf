@@ -14,6 +14,6 @@
  * limitations under the License.
  */
 
-output "east_app_server_ip" {
-  value = values(google_compute_instance_from_template.app_east_vms_from_tpl).*.network_interface.0.network_ip
+output "app_server_ip" {
+  value = values(google_compute_instance_from_template.app_vms_from_tpl).*.network_interface.0.network_ip
 }

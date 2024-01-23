@@ -14,36 +14,30 @@
  * limitations under the License.
  */
 
-app-prod-east-ip-subnet = ""
+####################
+### DR Variables ###
+####################
+app-dr-project = ""
 
-app-prod-east-ip-region = ""
+app-dr-subnet = ""
 
-app-dr-east-project  = ""
+app-dr-sa = ""
 
-app-prod-east-project = ""
+app-dr-sa-scopes = [""]
 
-app-dr-region = ""
+app-dc-gce-display-name = ""
 
-app-failback-dc-zone = ""
+app-dc-disk-type = ""
 
-app-failback-region = ""
+app-dc-machine-type = ""
 
-dr-dc-zone = ""
+app-dr-dc-ip = ""
 
-dr-east-dc-gce-display-name = ""
+app-dr-dc-zone = ""
 
-failback-east-dc-gce-display-name = ""
+#####################################
+### Failback/Production Variables ###
+#####################################
+app-prod-project = ""
 
-dr-east-dc-pri-boot-disk-selflink = ""
-
-app-east-dc-disk-type = ""
-
-east-dc-machine-type = ""
-
-east-dr-subnet = ""
-
-east-dr-dc-ip = ""
-
-east-dr-sa = ""
-
-east-dr-sa-scopes = [""]
+app-prod-dc-zone = ""

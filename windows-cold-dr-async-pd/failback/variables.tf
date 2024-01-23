@@ -14,106 +14,69 @@
  * limitations under the License.
  */
 
-variable "app-failback-east-ip-subnet" {
+#####################################
+### Failback/Production Variables ###
+#####################################
+variable "app-prod-project" {
   type        = string
-  description = "The subnet in East to associate the failback app server IP address resources with"
+  description = "The failback/production project"
 }
 
-variable "app-failback-east-project" {
+variable "app-prod-ip-subnet" {
   type        = string
-  description = "The project containing the failback app server primary boot disks"
+  description = "The failback/production subnet"
 }
 
-variable "app-failback-dc-zone" {
+variable "app-prod-service-account" {
   type        = string
-  description = "The zone to contain the domain controller failback boot disk"
+  description = "The failback/production GCE service account"
 }
 
-variable "failback-east-dc-gce-display-name" {
-  type        = string
-  description = "The DR east domain controller name in the GCE console"
-}
-
-variable "app-east-dc-disk-type" {
-  type        = string
-  description = "The DR domain controller secondary boot disk type"
-}
-
-variable "east-dc-machine-type" {
-  type        = string
-  description = "The DR domain controller machine type"
-}
-
-variable "east-failback-dc-ip" {
-  type        = string
-  description = "The DR domain controller machine type"
-}
-
-variable "east-failback-sa" {
-  type        = string
-  description = "The DR east GCE service account"
-}
-
-variable "east-failback-sa-scopes" {
+variable "app-prod-service-account-scopes" {
   type        = list(any)
-  description = "The DR east GCE service account"
+  description = "The failback/production GCE service account scopes"
+}
+
+variable "app-prod-dc-zone" {
+  type        = string
+  description = "The failback/production zone to contain the domain controller"
+}
+
+variable "app-dc-gce-display-name" {
+  type        = string
+  description = "The domain controller name in the GCE console"
+}
+
+variable "app-dc-disk-type" {
+  type        = string
+  description = "The failback/production domain controller boot disk type"
+}
+
+variable "app-dc-machine-type" {
+  type        = string
+  description = "The failback/production domain controller machine type"
+}
+
+variable "app-prod-dc-ip" {
+  type        = string
+  description = "The failback/production domain controller IP address"
 }
 
 
-
-
-
-variable "app-prod-east-tpl-self-link" {
+####################
+### DR Variables ###
+####################
+variable "app-dr-project" {
   type        = string
-  description = "The self link to the app server template"
-}
-
-variable "app-dr-east-tpl-self-link" {
-  type        = string
-  description = "The self link to the app server template"
-}
-
-variable "app-prod-east-ip-subnet" {
-  type        = string
-  description = "The subnet in East4 to associate the production app server IP address resources with"
-}
-
-variable "app-prod-east-region" {
-  type        = string
-  description = "The region to store the production app server IP address resources"
-}
-
-variable "app-dr-east-project" {
-  type        = string
-  description = "The DR project to contain the secondary boot disks"
-}
-
-variable "app-prod-east-project" {
-  type        = string
-  description = "The project containing the app server primary boot disks"
+  description = "The DR project"
 }
 
 variable "app-dr-region" {
   type        = string
-  description = "The DR project to create the secondary boot disks in"
+  description = "The DR region"
 }
 
 variable "app-dr-dc-zone" {
   type        = string
-  description = "The zone to contain the domain controller secondary boot disk"
-}
-
-variable "app-dr-east-dc-gce-display-name" {
-  type        = string
-  description = "The DR east domain controller name in the GCE console"
-}
-
-variable "app-dr-east-dc-pri-boot-disk-selflink" {
-  type        = string
-  description = "The east domain controller primary boot disk self link"
-}
-
-variable "app-east-dc-disk-type" {
-  type        = string
-  description = "The DR domain controller secondary boot disk type"
+  description = "The DR zone to contain the domain controller"
 }

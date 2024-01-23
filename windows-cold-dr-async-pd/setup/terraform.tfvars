@@ -14,28 +14,34 @@
  * limitations under the License.
  */
 
-app-prod-east-tpl-self-link = ""
+######################
+### Prod Variables ###
+######################
+app-prod-project = ""
 
-app-prod-east-service-account = ""
+app-prod-region = ""
 
-app-prod-east-service-account-scopes = ""
+app-prod-tpl-self-link = ""
 
-app-prod-east-ip-subnet = ""
+app-prod-service-account = ""
 
-app-prod-east-region = ""
+app-prod-service-account-scopes = ""
 
-app-dr-east-project = ""
+app-prod-ip-subnet = ""
 
-app-prod-east-project = ""
+app-prod-dc-gce-display-name = ""
+
+app-prod-dc-disk-selflink = ""
+
+app-dc-disk-type = ""
+
+app-prod-dc-zone = ""
+
+####################
+### DR Variables ###
+####################
+app-dr-project = ""
 
 app-dr-region = ""
 
 app-dr-dc-zone = ""
-
-app-dr-east-dc-gce-display-name = ""
-
-app-dr-east-dc-pri-boot-disk-selflink = ""
-
-app-east-dc-disk-type = ""
-
-prod-east-domain-controller-disk-selflink = ""

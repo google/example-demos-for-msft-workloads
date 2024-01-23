@@ -13,14 +13,14 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
-resource "google_compute_disk" "dr-sec-boot-disks-for-east-vms" {
-  depends_on = [google_compute_instance_from_template.app_east_vms_from_tpl]
-  for_each = local.sec_boot_disks_for_dr_east
-  name     = each.key
-  type     = each.value.disk_type
-  zone     = each.value.dr_zone
-  project  = var.app-dr-east-project
+ 
+resource "google_compute_disk" "failback-sec-boot-disks-for-app-vms" {
+  depends_on = [google_compute_instance.dr-vms]
+  for_each   = local.sec_boot_disks_for_failback
+  name       = each.key
+  type       = each.value.disk_type
+  zone       = each.value.failback_zone
+  project    = var.app-prod-project
 
   guest_os_features {
     type = "UEFI_COMPATIBLE"
@@ -45,17 +45,18 @@ resource "google_compute_disk" "dr-sec-boot-disks-for-east-vms" {
   licenses = ["projects/windows-cloud/global/licenses/windows-server-2022-dc"]
 
   async_primary_disk {
-    disk = "projects/${var.app-prod-east-project}/zones/${each.value.prim_disk_zone}/disks/${each.value.prim_disk}"
+    disk = "projects/${var.app-dr-project}/zones/${each.value.dr_disk_zone}/disks/${each.value.dr_disk}"
   }
 
   physical_block_size_bytes = 4096
 }
 
-resource "google_compute_disk" "dr-sec-boot-disk-for-east-dc" {
-  name       = "${var.app-dr-east-dc-gce-display-name}-secboot"
-  type       = var.app-east-dc-disk-type
-  zone       = var.app-dr-dc-zone
-  project    = var.app-dr-east-project
+resource "google_compute_disk" "failback-sec-boot-disk-for-dc" {
+  depends_on = [google_compute_instance.dr-dc]
+  name       = "${var.app-dc-gce-display-name}-failback"
+  type       = var.app-dc-disk-type
+  zone       = var.app-prod-dc-zone
+  project    = var.app-prod-project
 
   guest_os_features {
     type = "UEFI_COMPATIBLE"
@@ -80,7 +81,7 @@ resource "google_compute_disk" "dr-sec-boot-disk-for-east-dc" {
   licenses = ["projects/windows-cloud/global/licenses/windows-server-2022-dc"]
 
   async_primary_disk {
-    disk = var.app-dr-east-dc-pri-boot-disk-selflink
+    disk = "projects/${var.app-dr-project}/zones/${var.app-dr-dc-zone}/disks/${var.app-dc-gce-display-name}-secboot"
   }
 
   physical_block_size_bytes = 4096

@@ -14,49 +14,32 @@
  * limitations under the License.
  */
 
-app-failback-east-ip-subnet = ""
+#####################################
+### Failback/Production Variables ###
+#####################################
+app-prod-project = ""
 
-app-failback-east-region = ""
+app-prod-ip-subnet = ""
 
-app-failback-east-project = ""
+app-prod-service-account = ""
 
-app-failback-dc-zone = ""
+app-prod-service-account-scopes = [""]
 
-app-failback-region = ""
+app-prod-dc-zone = ""
 
-failback-east-dc-gce-display-name = ""
+app-dc-gce-display-name = ""
 
-app-east-dc-disk-type = ""
+app-prod-dc-ip = ""
 
-east-dc-machine-type = ""
+app-dc-disk-type = ""
 
-east-failback-dc-ip = ""
+app-dc-machine-type = ""
 
-east-failback-sa = ""
+####################
+### DR Variables ###
+####################
+app-dr-project = ""
 
-east-failback-sa-scopes = [""]
+app-dr-region = ""
 
-
-
-
-
-
-app-prod-east-tpl-self-link = "https://www.googleapis.com/compute/v1/projects/epic-testing-prod-east/global/instanceTemplates/epic-app-tpl"
-
-app-dr-east-tpl-self-link = "https://www.googleapis.com/compute/v1/projects/epic-testing-dr-east/global/instanceTemplates/epic-app-tpl"
-
-app-prod-east-ip-subnet = "projects/epic-testing-shared-svcs/regions/us-east4/subnetworks/prod-epic-app-us-east4"
-
-app-prod-east-ip-region = "us-east4"
-
-app-dr-east-project = "epic-testing-dr-east"
-
-app-prod-east-project = "epic-testing-prod-east"
-
-app-dr-region = "us-central1"
-
-app-dr-dc-zone = "us-central1-a"
-
-app-dr-east-dc-gce-display-name = "ep-dc-east4-001"
-
-app-dr-east-dc-pri-boot-disk-selflink = "projects/epic-testing-prod-east/zones/us-east4-a/disks/ep-dc-east4-001-failback"
+app-dr-dc-zone = ""
