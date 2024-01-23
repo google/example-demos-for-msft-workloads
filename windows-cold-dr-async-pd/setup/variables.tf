@@ -47,7 +47,7 @@ variable "app-prod-ip-subnet" {
   description = "The subnet to associate the production app servers with"
 }
 
-variable "app-prod-dc-gce-display-name" {
+variable "app-dc-gce-display-name" {
   type        = string
   description = "The production domain controller name in the GCE console"
 }

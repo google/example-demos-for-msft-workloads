@@ -29,7 +29,7 @@ app-prod-service-account-scopes = ""
 
 app-prod-ip-subnet = ""
 
-app-prod-dc-gce-display-name = ""
+app-dc-gce-display-name = ""
 
 app-prod-dc-disk-selflink = ""
 

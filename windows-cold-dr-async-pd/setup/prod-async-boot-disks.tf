@@ -52,7 +52,7 @@ resource "google_compute_disk" "dr-sec-boot-disks-for-app-vms" {
 }
 
 resource "google_compute_disk" "dr-sec-boot-disk-for-dc" {
-  name    = "${var.app-prod-dc-gce-display-name}-secboot"
+  name    = "${var.app-dc-gce-display-name}-secboot"
   type    = var.app-dc-disk-type
   zone    = var.app-dr-dc-zone
   project = var.app-dr-project
