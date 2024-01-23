@@ -23,7 +23,6 @@ The process starts when SQL Server transaction log backup files are being upload
 
 The upload event fires an EventArc trigger that calls the python function. The function gets the path to the log file that was uploaded and constructs the request to restore the uploaded backup file to the Cloud SQL for SQL Server instance.
 
-
 After the execution of the import request, the function checks periodically the progress of the restore operation. Once the status of the operation changes to "DONE", which means that it has an outcome, the function executes the following:
 
 1. If the operation returns SUCCESS (determined by the absence of the 'error' element in the response json), then the function makes a copy of the backup file 'processed' storage bucket (if defined) and then finally deletes the file from the source storage bucket, thus signaling that the function processed the file successfully.
@@ -36,33 +35,33 @@ After the execution of the import request, the function checks periodically the 
 
     * If the import fails for any other reason, the function schedules a later restore attempt in the same execution. The file is not deleted in case of errors.
 
+If the function breaks mid-way, the log backup file will not be deleted from the source bucket (regardless if it was restored to the CloudSQL instance or not). This signifies that it was not processed successfully and that it should be manually scheduled for re-upload.
 
-The function can also restore full and differential backup files. To achieve this functionality, upload these files to the "full" respectively "diff" top level folders in the bucket. By default, the function restores backups with the norecovery option, leaving the database in a state to expect further sequential restores. 
+The function needs certain information to make the proper request to restore the uploaded backup file to the Cloud SQL for SQL Server instance. This information includes:
+        - The Cloud SQL Instance name
+        - The database name
+        - The type of backup (full, differential or transaction log backup)
+        - If the backup is restore with recovery or not (leaving the database ready to perform subsequent restores in case of no recovery used)
 
-If you need to switching to the DR Cloud SQL instance, the function must restore a backup file with the recovery option true. To do this,  simply create a "recovery" folder and upload the last log backup to that folder. This triggers the recovery option and leaves the database in the accessible state.
+There are two ways in which the function gets this information: Either from the file name itself or from object metadadata. To enable the function to use the file name functionality, set the USE_FIXED_FILE_NAME_FORMAT environment variable to "True". In this way, the function expects all the uploaded backup files to have a fixed name pattern from which it inferrs the needed information. More information below, in the Constraints section. We recommend using the option that is easier for you to implement (either changing backup file names or deciding the logic to persist object metadata).
 
+The function can also restore full and differential backup files. To achieve this functionality, use the two options provided (fixed file name or object metadata to signal to the function that the backups are full, differential or transaction log backups)
+In case of fixed file name, make sure that you have the substrings "_full" or "_diff" in the file name to trigger full respectively diff backup restores.
 
-This repository also contains a powershell script for regularly uploading new files to cloud storage. The command to create a scheduled task in Windows to run it on a regular basis. For example, the scheduled task below script starts execution at 2:45 PM and runs every 5 minutes.
+By default, the function restores backups with the norecovery option, leaving the database in a state to expect further sequential restores. Use the "_recovery" substring in the file name or set the Recovery tag to "True" in the object metadata. This is useful when you need to switching to your DR Cloud SQL instance. In such cases, the function must restore a backup file with the recovery option true. This triggers the recovery option and leaves the database in the accessible state.
 
-
-
-    schtasks /create /sc minute /mo 5 /tn "GCS Upload script" /tr "powershell <script_full_path>" /st 14:45 /ru <local_account_username> /rp 
-
-
-
-Replace <script_full_path> with the path to your powershell script and <username> with a local user account with privileges to read and edit the settings.json files on your machine. You will be prompted to provide the password for the local <local_account_username> when you create the task.
-
-
-
-The function must have defined a set of environment variables defined in the env.yml file. Details about them are described below, in the constraints section.
+This repository also contains a powershell script for regularly uploading new files to cloud storage called upload-script.ps1, existing in the scheduled-upload folder. This provides an automated way of uploading the backup files logs to cloud storage.
 
 
-## Setup and configuration
+The function must have defined a set of environment variables. Details about them are described below, in the constraints section.
+
+
+## Setup and configuration - Cloud Function
 
 
 1. Create a GCS bucket to upload your transaction log backup files:
 
-        gcloud storage buckets create gs://<bucket-name> \
+        gcloud storage buckets create gs://<BUCKET_NAME> \
         --project=<project-id> \
         --location=BUCKET_LOCATION \
         --public-access-prevention
@@ -75,8 +74,7 @@ Copy the value of the serviceAccountEmailAddress field. It should be something i
 
 1. Grant objectViewer rights for the CloudSQL service account on the bucket you just created:
 
-        gsutil iam ch serviceAccount:<service-account-email-address>@gcp-sa-cloud-sql.iam.gserviceaccount.com:legacyBucketReader,objectViewer gs://<bucket-name>
-
+        gsutil iam ch serviceAccount:<service-account-email-address>@gcp-sa-cloud-sql.iam.gserviceaccount.com:legacyBucketReader,objectViewer gs://<BUCKET_NAME>
 
 1. Create a service account for the cloud function:
 
@@ -106,8 +104,6 @@ Copy the value of the serviceAccountEmailAddress field. It should be something i
 
 - Navigate to the restore-sql-server-transaction-logs/Function folder
 
-- Edit the env.yml file according to your setup.
-
 - From the restore-sql-server-transaction-logs/Function folder, run the following gcloud command to deploy the cloud function:
 
         gcloud functions deploy <YOUR_FUNCTION_NAME> \
@@ -116,7 +112,7 @@ Copy the value of the serviceAccountEmailAddress field. It should be something i
         --runtime=<YOUR_RUNTIME> \
         --source=<YOUR_SOURCE_LOCATION> \
         --entry-point=<YOUR_CODE_ENTRYPOINT> \
-        --env-vars-file=env.yml \
+        --set-env-vars USE_FIXED_FILE_NAME_FORMAT=False,PROCESSED_BUCKET_NAME=,MAX_REQUEST_ATTEMPTS=5,MAX_REQUEST_FETCH_TIME_SECONDS=5,MAX_OPERATION_FETCH_TIME_SECONDS=5
         --service-account cloud-function-sql-restore-log@alexcarciu-alloy-db-testing.iam.gserviceaccount.com
 
 1. To invoke an authenticated cloud function, the underlying principal must have the invoker IAM permission. Assign the Invoker role (roles/run.invoker) through Cloud Run for 2nd gen functions to the function’s service account:
@@ -126,44 +122,105 @@ Copy the value of the serviceAccountEmailAddress field. It should be something i
         --member="serviceAccount:cloud-function-sql-restore-log@${PROJECT_ID}.iam.gserviceaccount.com"
 
 
+## Setup and configuration - Upload script
+
+To be able to run the powershell script on a regular basis, perform the following actions:
+
+1. First, create a service account that has rights to upload to the bucket:
+
+        gcloud iam service-accounts create tx-log-backup-writer \
+        --description="Account that writes transaction log backups to GCS" \
+        --display-name="tx-log-backup-writer"
+
+1. Grant rights on the service account to view, create and overwrite objects on the bucket:
+
+        gsutil iam ch serviceAccount:tx-log-backup-writer@${PROJECT_ID}.iam.gserviceaccount.com:objectAdmin gs://<BUCKET_NAME>
+
+1. Create a private key for your service account. You need to store the private key file locally to be authorized to upload files to the bucket.
+
+        gcloud iam service-accounts keys create KEY_FILE \
+        --iam-account=tx-log-backup-writer@${PROJECT_ID}.iam.gserviceaccount.com
+
+1. Create a folder on a machine with access to the backup files. Place the upload-script.ps1 from the repository in that folder. Copy the key file from the previous step.
+
+1. Open the script and edit the following constants:
+
+Provide in the -Value parameter the full path to the folder where your backup files will be generated:
+
+        New-Variable -Name LocalPathForBackupFiles -Value "" -Option Constant
+
+Provide in the -Value parameter the name of the bucket where you want the backup files to be uploaded:
+
+        New-Variable -Name BucketName -Value "" -Option Constant
+
+Provide in the -Value parameter the full path to the key file that you generated earlier and saved locally on the machine where the script runs:
+
+        New-Variable -Name GoogleAccountKeyFile -Value "" -Option Constant
+
+1. Execute a command to create a scheduled task in Windows to run it on a regular basis. For example, the scheduled task below script starts execution at 2:45 PM and runs every 1 minute.
+
+
+    schtasks /create /sc minute /mo 1 /tn "GCS Upload script" /tr "powershell <script_full_path>" /st 14:45 /ru <local_account_username> /rp 
+
+
+Replace <script_full_path> with the path to your powershell script and <username> with a local user account with privileges to read and edit the settings.json files on your machine. You will be prompted to provide the password for the local <local_account_username> when you create the task.
+
+The powershell script runs every 1 minute uploads only new backup files from your specified folder cloud storage. The tracking is kept in the log.json file (created by the script).
+
+You can monitor the execution of the script and set up alerting based on execution count. For example, you can set up an alert if the function did not execute successfully in the last 5 minutes.
+
+For more information about service account keys, see [Create a service account key](https://cloud.google.com/iam/docs/keys-create-delete#creating) and [Best practices for managing service account keys](https://cloud.google.com/iam/docs/best-practices-for-managing-service-account-keys).
+
+
+
 ## Constraints and working assumptions:
 
 
-1. The transaction log backup files are uploaded on a continuous, regular and batched manner to the cloud storage bucket. Ideally, the upload of the transaction log files happens in the same order as their creation time.
+1. The transaction log backup files are uploaded on a continuous, regular and batched manner to the cloud storage bucket. Ideally, the upload of the transaction log files happens in the same order as their creation time so that there is a constant, ordered stream of files being uploaded. In case of multiple files uploaded at the same time, race conditions could happen and some backups might not be processed as they are too late for restore.
 
-1. There special keyword folders in the bucket as follows:
+1. The function needs certain information to make the proper request to restore the uploaded backup file to the Cloud SQL for SQL Server instance. This information includes the Cloud SQL Instance name, database name, the type of backup (full, differential or transaction log backup) and if the backup is restored with recovery or not. There are two ways in which the function gets the necessary this information:
+        
+- From the file name itself. To enable this functionality, set the USE_FIXED_FILE_NAME_FORMAT environment variable to "True". In this way, the function expects all the uploaded backup files to have a fixed name pattern from which it inferrs the needed information. The fixed file name pattern is:
 
-    - all files under the top full folder will be treated as full backups
-    - all files under the top diff folder will be treated as diff backups
-    - any other files are treated as transaction log backups
-    - all files under the recovery folder (wheter this folder is situated at the top level or nested under full or diff or any other folders) will be restored with the recovery option.
+        <cloud-sql-instance-name>_<database-name>_[<backup_type>]_[<recovery>].*
 
-1. The files should follow a consistent naming scheme that includes certain elements. For example, an element describing the database name distinguishable by separators. The underscore character can be used as a separator"_". The function expects the separator and in the FILE_NAME_SEPARATOR respectively the DB_NAME_GROUP_POSITION environment variables. The DB_NAME_GROUP_POSITION works as a 1-based index, from left to right. 
+- [cloud-sql-instance-name] - is the name of the cloud sql for sql server instance where the restore request is made. Mandatory when useing fixed file name option.
+- [database-name] - is the name of the database where the function executes the restore operation. Mandatory when useing fixed file name option.
 
-    For example, if the transaction log backup files name use the following pattern:
+- [backup_type] - Optional. If the function finds the substring "_full" or "_diff" in the file name, it will execute a full respectively a diff restore. If there is no such substring, the function performs the default TLOG restore.
 
-        <instance_name>_<database-name>_<timestamp>.TRN
+- [recovery] - Optional. If the function finds the substring "_recovery" in the file name, it will execute the restore with the recovery option enabled. This will recover the database and leave it in an accessible state. However, no subsequent backups can be restored to the database. If there is no such substring, the function performs the default restore with no recovery, allowing subsequent restores to be applied to the database
 
-    The values for the FILE_NAME_SEPARATOR and DB_NAME_GROUP_POSITION look like this:
+Note that when using this option, the function ignores any object metadata.
 
-        FILE_NAME_SEPARATOR = "_"
-        DB_NAME_GROUP_POSITION = "2"
+- Using metadata. To enable this functionality, set the USE_FIXED_FILE_NAME_FORMAT environment variable to "False". The function gets information about the restore from object metadata. The following metadata tags are expected:
+        
+- [CloudSqlInstance] - This is the name of the cloud sql for sql server instance where the restore request is made. Mandatory.
 
-1. As the function can also be used to restore full and differential backups, the transaction log backup files should be uploaded to any folder except the top folder "full" respectively "diff" (case insensitive) which is used for restoring full respectively differential backup files.
+- [DatabaseName] - This the name of the database where the function executes the restore operation. Mandatory.
 
-1. Define the environment variables in the env.yml file.
+- [BackupType] - This is the backup type. Can be only "FULL", "DIFF" or "TLOG". Mandatory.
+
+- [Recovery] - This is the recovery type. Can be only "True" or "False". Mandatory.
+
+
+When performing the upload to the GCS bucket, construct logic to set metadata tags. In the provided powershell script, the template to place this logic is provided through functions.
+
+Note that when using this option, the function completly ignores the backup file names.
+
+The upload script provides functions where logic can be placed to define the value of the metadata tags, when using this option.
 
 1. The service account role of the Cloud SQL Instance must have objectViewer rights on the source bucket.
 
 1. The service account of the Cloud function has the following rights to import data from a cloud storage bucket to a Cloud SQL instance and to synchronize backup files on the upload and processed storage buckets:
 
-    - cloudsql.instances.get
-    - cloudsql.instances.import
-    - eventarc.events.receiveEvent
-    - storage.buckets.get
-    - storage.objects.create
-    - storage.objects.delete
-    - storage.objects.get
+    - cloudsql.instances.get - to query information from the Cloud SQL instance
+    - cloudsql.instances.import - to request a backup import(restore) to the Cloud SQL instance
+    - eventarc.events.receiveEvent - to be able to recevie an eventarc trigger event
+    - storage.buckets.get - to be able to get information about storage buckets
+    - storage.objects.create - to be able to create objects a google cloud storage bucket
+    - storage.objects.delete - to be able to delete (overwrite) objects on a google cloud storage bucket
+    - storage.objects.get - to be able to read objects on a google cloud storage bucket
 
 
 ## References
