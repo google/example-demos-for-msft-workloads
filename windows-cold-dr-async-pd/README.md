@@ -40,7 +40,8 @@ This demo uses a [Shared VPC](https://cloud.google.com/vpc/docs/shared-vpc#share
 ### IAM Requirements
 
 The following IAM Roles are required for this demo
-1. [Project Creator](https://cloud.google.com/resource-manager/docs/access-control-proj#resourcemanager.projectCreator)
+1. [Project Creator](https://cloud.google.com/iam/docs/understanding-roles#resourcemanager.projectCreator)
+2. [Project Deleter](https://cloud.google.com/iam/docs/understanding-roles#resourcemanager.projectDeleter)
 2. [Billing Account User](https://cloud.google.com/billing/docs/how-to/billing-access#billing.user) for the Billing Account in your Organization
 3. [Compute Admin](https://cloud.google.com/iam/docs/understanding-roles#compute.admin)
 4. [Compute Shared VPC Admin](https://cloud.google.com/iam/docs/understanding-roles#compute.xpnAdmin)
@@ -65,9 +66,11 @@ The following IAM Roles are required for this demo
 6. Create a [VPC Peering configuration](https://cloud.google.com/vpc/docs/using-vpc-peering#creating_a_peering_configuration) between the `shared-svcs` VPC and `app-prod` VPC
     - You will also need to create a reverse VPC Peering from the `app-prod` VPC to the `shared-svcs`
     - **_Optional_** You can pre-stage the peering from the `shared-svcs` VPC to the `app-dr` VPC to save time, but it is not required at this time.
-8. In the Shared VPC Host Project, configure Cloud DNS per [best practices](https://cloud.google.com/compute/docs/instances/windows/best-practices) to support your domain and Active Directory.  You will need a forwarding zone for your domain associated with Shared Services, and DNS Peering from Shared Services to the other VPCs to support domain resolution.
+7. [Enable the Shared VPC Host Project](https://cloud.google.com/vpc/docs/provisioning-shared-vpc#enable-shared-vpc-host)
+8. [Attach the Production and DR Service Projects](https://cloud.google.com/vpc/docs/provisioning-shared-vpc#create-shared)
+9. In the Shared VPC Host Project, configure Cloud DNS per [best practices](https://cloud.google.com/compute/docs/instances/windows/best-practices) to support your domain and Active Directory.  You will need a forwarding zone for your domain associated with Shared Services, and DNS Peering from Shared Services to the other VPCs to support domain resolution.
     - More info on Cloud DNS can be found [here](https://cloud.google.com/dns/docs/best-practices).
-9. Set up optional Domain Controller on the Production VPC
+10. Set up optional Domain Controller on the Production VPC
 
 # How to Setup the Test Servers
 ***As mentioned above, a domain controller can be used in testing.  If wishing to use one, please manually create one first, then proceed to the steps below.  If not using a domain controller, you will need to comment out lines 26-32 in prod-async-rep.tf and lines 54 to 87 in prod-sec-boot-disks.tf.***
