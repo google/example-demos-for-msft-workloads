@@ -30,6 +30,9 @@ Contains code to spin up failback/production servers using the replicated disks 
 # How to Setup the Environment
 As of 01/2024, this repo does not contain the code necessary to build out an entire environment.  Some general steps and guidelines are provided here in order to help with this demo.
 
+> [!NOTE]
+> These instructions assume that you are building out the same environment as shown in the Architecture diagram
+
 ### Organization Requirements
 
 This demo uses a [Shared VPC](https://cloud.google.com/vpc/docs/shared-vpc#shared_vpc_host_project_and_service_project_associations) architecture which requires the use of a Google Cloud Organization. 
@@ -43,14 +46,25 @@ The following IAM Roles are required for this demo
 4. [Compute Shared VPC Admin](https://cloud.google.com/iam/docs/understanding-roles#compute.xpnAdmin)
 
 ### Building The Environment
-1. Create three projects in Google Cloud -- a Shared VPC host project, one "production" project, and one "DR" project
-2. In the Shared VPC host project, create three VPCs -- one for shared services, one for production, and one for DR
-3. Configure two subnets in Shared Services, one each in your designated production and DR regions
-4. Configure one subnet in Production in your designated prod region.  Do not overlap IPs with Shared Services.
-5. Configure one subnet in DR in your designated DR region.  Use the same IP CIDR block as you did for Production.
-6. Configure the Shared VPC permissions -- any user testing this solution will need Network User access to the Production and DR subnets, as well as the ability to peer VPCs
-7. Peer Shared Services with Production, and Production with Shared Services
-    - You could also peer DR with Shared Services to speed things up later, but it's not required at this time
+1. Create three (3) projects in Google Cloud
+    - Project #1: Shared VPC Host Project
+    - Project #2: Service Project for Production
+    - Project #3: Service Project for DR
+2. Create three (3) VPCs in the **Shared VPC Host Project** c
+    - VPC #1: Shared Services VPC as `shared-svcs` 
+    - VPC #2: Production VPC as `app-prod` 
+    - VPC #3: DR VPC as `app-dr`
+3. In the `shared-svcs` VPC, create two (2) subnets
+    - Shared Services Subnet #1: `sn-shrdsvcs-us-east4` with IP range `10.0.0.0/21`
+    - Shared Services Subnet #2: `sn-shrdsvcs-us-central1` with IP range `10.20.0.0/21`
+4. In the `app-prod` VPC create one (1) subnet
+    - Production Subnet #1: `prod-app-us-east4` with IP range `10.1.0.0/21`
+5. In the `app-dr` VPC create one (1) subnet
+    - DR Subnet #1: `dr-app-us-central1` with IP range `10.1.0.0/21`
+      **_Note_** The IP range in DR is the same as Production
+6. Create a [VPC Peering configuration](https://cloud.google.com/vpc/docs/using-vpc-peering#creating_a_peering_configuration) between the `shared-svcs` VPC and `app-prod` VPC
+    - You will also need to create a reverse VPC Peering from the `app-prod` VPC to the `shared-svcs`
+    - **_Optional_** You can pre-stage the peering from the `shared-svcs` VPC to the `app-dr` VPC to save time, but it is not required at this time.
 8. In the Shared VPC Host Project, configure Cloud DNS per [best practices](https://cloud.google.com/compute/docs/instances/windows/best-practices) to support your domain and Active Directory.  You will need a forwarding zone for your domain associated with Shared Services, and DNS Peering from Shared Services to the other VPCs to support domain resolution.
     - More info on Cloud DNS can be found [here](https://cloud.google.com/dns/docs/best-practices).
 9. Set up optional Domain Controller on the Production VPC
