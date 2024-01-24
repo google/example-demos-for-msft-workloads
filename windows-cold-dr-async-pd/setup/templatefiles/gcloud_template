@@ -1,8 +1,22 @@
-gcloud compute instance-templates create \
-    app-server-tpl --machine-type=<INSERT MACHINE TYPE> \
-    --network-interface=subnet=<INSERT SUBNET SELFLINK>,no-address \
-    --metadata=enable-oslogin=false --maintenance-policy=MIGRATE \
-    --provisioning-model=STANDARD --service-account=<INSERT SERVICE ACCOUNT> \
-    --scopes=https://www.googleapis.com/auth/cloud-platform --region=<INSERT REGION> \
+Tips
+===
+1. To get the Subnet selfLink, run this command and replace the values accordingly
+   > gcloud compute networks subnets describe prod-app-us-east4 --region=us-east4 --project=REPLACE_WITH_YOUR_SHARED_VPC_PROJECT_ID --format="value(selfLink)"
+
+2. To get the Compute Engine Default Service Account, run the following command and replace the values accordingly
+   > gcloud iam service-accounts list --project=REPLACE_WITH_SERVICE_PROJECT_FOR_PRODUCTION_PROJECT_ID
+
+   Note: If there are multiple values returned, use the Service Account email associated with the "Compute Engine default service account"
+
+gcloud compute instance-templates create app-server-tpl \
+    --project=REPLACE_WITH_SERVICE_PROJECT_FOR_PRODUCTION_PROJECT_ID \
+    --machine-type=REPLACE_WITH_PREFERRED_MACHINE_TYPE \
+    --network-interface=subnet=REPLACE_WITH_SUBNET_SELF_LINK,no-address \
+    --metadata=enable-oslogin=false \
+    --maintenance-policy=MIGRATE \
+    --provisioning-model=STANDARD \
+    --service-account=REPLACE_WITH_COMPUTE_ENGINE_DEFAULT_SERVICE_ACCOUNT \
+    --scopes=https://www.googleapis.com/auth/cloud-platform \
+    --region=us-east4 \
     --create-disk=auto-delete=yes,boot=yes,image=projects/windows-cloud/global/images/windows-server-2022-dc-v20231011,mode=rw,size=50,type=pd-balanced \
     --reservation-affinity=any

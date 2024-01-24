@@ -68,9 +68,11 @@ The following IAM Roles are required for this demo
     - **_Optional_** You can pre-stage the peering from the `shared-svcs` VPC to the `app-dr` VPC to save time, but it is not required at this time.
 7. [Enable the Shared VPC Host Project](https://cloud.google.com/vpc/docs/provisioning-shared-vpc#enable-shared-vpc-host)
 8. [Attach the Production and DR Service Projects](https://cloud.google.com/vpc/docs/provisioning-shared-vpc#create-shared)
+    - Ensure that you share `prod-app-us-east4` with the Production Project only
+    - Ensure that you share `dr-app-us-central1` with the DR Project only
 9. In the Shared VPC Host Project, configure Cloud DNS per [best practices](https://cloud.google.com/compute/docs/instances/windows/best-practices) to support your domain and Active Directory.  You will need a forwarding zone for your domain associated with Shared Services, and DNS Peering from Shared Services to the other VPCs to support domain resolution.
     - More info on Cloud DNS can be found [here](https://cloud.google.com/dns/docs/best-practices).
-10. Set up optional Domain Controller on the Production VPC
+10. **_Optional_** If you wish to test with an Active Directory Domain, you can set up a [Domain Controller](https://cloud.google.com/architecture/deploy-an-active-directory-forest-on-compute-engine#deploy_the_active_directory_forest) in the Production Project using the `app-prod` VPC
 
 # How to Setup the Test Servers
 ***As mentioned above, a domain controller can be used in testing.  If wishing to use one, please manually create one first, then proceed to the steps below.  If not using a domain controller, you will need to comment out lines 26-32 in prod-async-rep.tf and lines 54 to 87 in prod-sec-boot-disks.tf.***
