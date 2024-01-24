@@ -93,9 +93,10 @@ The following IAM Roles are required for this demo
      - Secondary boot disks in the DR Project
      - Async replication to DR
 
-    > [!NOTE]
-    > Please allow 15-20 minutes for initial replication to complete. If using your own systems with larger disks, initial replication time may be longer. 
-    > The initial replication is complete when the `disk/async_replication/time_since_last_replication` metric is available in Cloud Monitoring.
+> [!NOTE]
+> Please allow 15-20 minutes for initial replication to complete. If using your own systems with larger disks, initial replication time may be longer. 
+> The initial replication is complete when the `disk/async_replication/time_since_last_replication` metric is available in Cloud Monitoring.
+
 5. Navigate to the **/dr** folder and update the `terraform.tfvars` file with repsective values to prepare for DR
 6. While in the **/setup** directory run the terraform commands
     `terraform init` 
