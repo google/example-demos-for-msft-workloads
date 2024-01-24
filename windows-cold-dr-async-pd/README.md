@@ -64,8 +64,8 @@ The following IAM Roles are required for this demo
     - DR Subnet #1: `dr-app-us-central1` with IP range `10.1.0.0/21`
       **_Note_** The IP range in DR is the same as Production
 6. Create a [VPC Peering configuration](https://cloud.google.com/vpc/docs/using-vpc-peering#creating_a_peering_configuration) between the `shared-svcs` VPC and `app-prod` VPC
-    - You will also need to create a reverse VPC Peering from the `app-prod` VPC to the `shared-svcs`
-    - **_Optional_** You can pre-stage the peering from the `shared-svcs` VPC to the `app-dr` VPC to save time, but it is not required at this time.
+    - You will also need to create a VPC Peering from the `app-prod` VPC to the `shared-svcs` VPC
+    - **_Optional_** You can pre-stage the peering from the `app-dr` VPC to the `shared-svcs` VPC to save time in a DR event, but it is not required at this time.
 7. [Enable the Shared VPC Host Project](https://cloud.google.com/vpc/docs/provisioning-shared-vpc#enable-shared-vpc-host)
 8. [Attach the Production and DR Service Projects](https://cloud.google.com/vpc/docs/provisioning-shared-vpc#create-shared)
     - Ensure that you share `prod-app-us-east4` with the Production Project only
