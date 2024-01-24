@@ -74,18 +74,33 @@ The following IAM Roles are required for this demo
     - More info on Cloud DNS can be found [here](https://cloud.google.com/dns/docs/best-practices).
 10. **_Optional_** If you wish to test with an Active Directory Domain, you can set up a [Domain Controller](https://cloud.google.com/architecture/deploy-an-active-directory-forest-on-compute-engine#deploy_the_active_directory_forest) in the Production Project using the `app-prod` VPC
 
-# How to Setup the Test Servers
-***As mentioned above, a domain controller can be used in testing.  If wishing to use one, please manually create one first, then proceed to the steps below.  If not using a domain controller, you will need to comment out lines 26-32 in prod-async-rep.tf and lines 54 to 87 in prod-sec-boot-disks.tf.***
+# Building The Test Servers
 
-1. Set up an instance template in the production project -- a sample gcloud command is located in \setup\templatefiles
-2. Navigate to the \setup folder
-3. Populate the .tfvars file with your values
-4. Navigate to the templatefiles folder and update `ad-join.tpl` with your values (or use your own domain join script)
-5. Navigate back to the \setup directory, and run `terraform init` and `terraform plan` to check for errors (should see 42 resources to add), then `terraform apply` to deploy 10 Windows Server servers and join them to your domain, create secondary boot disks in the DR project and zone, and establish the async replication pairs to DR
-    - Allow 15-20 minutes for initial replication to complete
-    - If using your own systems with larger disks, initial replication time may be longer. The initial replication is complete when the disk/async_replication/time_since_last_replication metric is available in Cloud Monitoring.
-6. Navigate to the \dr folder and update the .tfvars files with repsective values to prepare for DR
-7. Run `terraform init` and `terraform plan` (should see 11 resources to add) and fix any problems to speed up recovery during a DR event
+> [!IMPORTANT]
+> If you are not using a Domain Controller to test, please comment out lines `26-32` in `prod-async-rep.tf` and lines `54-87` in `prod-sec-boot-disks.tf`
+
+1. [Create an Instance template](https://cloud.google.com/compute/docs/instance-templates/create-instance-templates) in the Service Project for Production
+    - A sample `gcloud` command has been provided in the **/setup/templatefiles** folder for your convenience
+2. Navigate to the **/setup** folder and populate the `terraform.tfvars` file with your environment values
+    - If you are using a Domain Controller, navigate to the **/setup/templatefiles** folder and update `ad-join.tpl` with your values. 
+3. While in the **/setup** directory run the terraform commands
+    `terraform init` 
+    `terraform plan out tf.out` (there should be 42 resources to add)
+    `terrafor apply tf.out`  
+
+     The default configuration will deploy 
+     - Ten (10) Windows Servers (Domain joined if configured) 
+     - Secondary boot disks in the DR Project
+     - Async replication to DR
+
+    > [!NOTE]
+    > Please allow 15-20 minutes for initial replication to complete. If using your own systems with larger disks, initial replication time may be longer. 
+    > The initial replication is complete when the `disk/async_replication/time_since_last_replication` metric is available in Cloud Monitoring.
+5. Navigate to the **/dr** folder and update the `terraform.tfvars` file with repsective values to prepare for DR
+6. While in the **/setup** directory run the terraform commands
+    `terraform init` 
+    `terraform plan out tf.out` (there should be 11 resources to add)
+    `terrafor apply tf.out`  
 
 # DR Failover
 ***If not using a domain controller, you will need to comment out lines 26-32 in stage-failback-async-rep.tf and lines 18, 54 to 88 in stage-failback-async-boot-disks.tf.***

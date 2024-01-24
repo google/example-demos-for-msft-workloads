@@ -33,7 +33,7 @@ resource "google_compute_instance_from_template" "app_vms_from_tpl" {
   }
 
   metadata = {
-    windows-startup-script-ps1 = templatefile("./templatefiles/secondary-dc.tpl")
+    windows-startup-script-ps1 = templatefile("./templatefiles/ad-join.tpl")
   }
 }
 
