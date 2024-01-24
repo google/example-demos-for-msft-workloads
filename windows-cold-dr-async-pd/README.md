@@ -30,6 +30,19 @@ Contains code to spin up failback/production servers using the replicated disks 
 # How to Setup the Environment
 As of 01/2024, this repo does not contain the code necessary to build out an entire environment.  Some general steps and guidelines are provided here in order to help with this demo.
 
+### Organization Requirements
+
+This demo uses a [Shared VPC](https://cloud.google.com/vpc/docs/shared-vpc#shared_vpc_host_project_and_service_project_associations) architecture which requires the use of a Google Cloud Organization. 
+
+### IAM Requirements
+
+The following IAM Roles are required for this demo
+1. [Project Creator](https://cloud.google.com/resource-manager/docs/access-control-proj#resourcemanager.projectCreator)
+2. [Billing Account User](https://cloud.google.com/billing/docs/how-to/billing-access#billing.user) for the Billing Account in your Organization
+3. [Compute Admin](https://cloud.google.com/iam/docs/understanding-roles#compute.admin)
+4. [Compute Shared VPC Admin](https://cloud.google.com/iam/docs/understanding-roles#compute.xpnAdmin)
+
+### Building The Environment
 1. Create three projects in Google Cloud -- a Shared VPC host project, one "production" project, and one "DR" project
 2. In the Shared VPC host project, create three VPCs -- one for shared services, one for production, and one for DR
 3. Configure two subnets in Shared Services, one each in your designated production and DR regions
