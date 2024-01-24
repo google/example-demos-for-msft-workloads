@@ -28,9 +28,24 @@ Contains code to spin up DR servers using the replicated disks and IP addresses 
 Contains code to spin up failback/production servers using the replicated disks and IP addresses from DR, and includes code to recreate DR boot disks and async replication pairs to prepare for the next DR event.
 
 # How to Setup the Environment
+As of 01/2024, this repo does not contain the code necessary to build out an entire environment.  Some general steps and guidelines are provided here in order to help with this demo.
+
+1. Create three projects in Google Cloud -- a Shared VPC host project, one "production" project, and one "DR" project
+2. In the Shared VPC host project, create three VPCs -- one for shared services, one for production, and one for DR
+3. Configure two subnets in Shared Services, one each in your designated production and DR regions
+4. Configure one subnet in Production in your designated prod region.  Do not overlap IPs with Shared Services.
+5. Configure one subnet in DR in your designated DR region.  Use the same IP CIDR block as you did for Production.
+6. Configure the Shared VPC permissions -- any user testing this solution will need Network User access to the Production and DR subnets, as well as the ability to peer VPCs
+7. Peer Shared Services with Production, and Production with Shared Services
+  - You could also peer DR with Shared Services to speed things up later, but it's not required at this time
+8. In the Shared VPC Host Project, configure Cloud DNS per [best practices](https://cloud.google.com/compute/docs/instances/windows/best-practices) to support your domain and Active Directory.  You will need a forwarding zone for your domain associated with Shared Services, and DNS Peering from Shared Services to the other VPCs to support domain resolution.
+  - More info on Cloud DNS can be found [here](https://cloud.google.com/dns/docs/best-practices).
+9. Set up optional Domain Controller on the Production VPC
+
+# How to Setup the Test Servers
 ***As mentioned above, a domain controller can be used in testing.  If wishing to use one, please manually create one first, then proceed to the steps below.  If not using a domain controller, you will need to comment out lines 26-32 in prod-async-rep.tf and lines 54 to 87 in prod-sec-boot-disks.tf.***
 
-1. Set up an instance template -- a sample gcloud command is located in \setup\templatefiles
+1. Set up an instance template in the production project -- a sample gcloud command is located in \setup\templatefiles
 2. Navigate to the \setup folder
 3. Populate the .tfvars file with your values
 4. Navigate to the templatefiles folder and update `ad-join.tpl` with your values (or use your own domain join script)
