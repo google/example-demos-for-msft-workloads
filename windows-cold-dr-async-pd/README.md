@@ -37,9 +37,9 @@ As of 01/2024, this repo does not contain the code necessary to build out an ent
 5. Configure one subnet in DR in your designated DR region.  Use the same IP CIDR block as you did for Production.
 6. Configure the Shared VPC permissions -- any user testing this solution will need Network User access to the Production and DR subnets, as well as the ability to peer VPCs
 7. Peer Shared Services with Production, and Production with Shared Services
-  - You could also peer DR with Shared Services to speed things up later, but it's not required at this time
+    - You could also peer DR with Shared Services to speed things up later, but it's not required at this time
 8. In the Shared VPC Host Project, configure Cloud DNS per [best practices](https://cloud.google.com/compute/docs/instances/windows/best-practices) to support your domain and Active Directory.  You will need a forwarding zone for your domain associated with Shared Services, and DNS Peering from Shared Services to the other VPCs to support domain resolution.
-  - More info on Cloud DNS can be found [here](https://cloud.google.com/dns/docs/best-practices).
+    - More info on Cloud DNS can be found [here](https://cloud.google.com/dns/docs/best-practices).
 9. Set up optional Domain Controller on the Production VPC
 
 # How to Setup the Test Servers
