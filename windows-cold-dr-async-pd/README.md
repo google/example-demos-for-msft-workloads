@@ -1,6 +1,6 @@
 # Windows Cold DR using PD Async Replication
 
-This code will facilitate the creation of 10 VMs that will auto-join a domain, a DR failover, and a failback.  The domain controller was built manually to support this solution, and should be created first if wishing to test with one.  This repo contains the code to build the secondary boot disk and establish the asyncrhonous replication for the manually created domain controller.  This solution uses [Persistent Disk Asynchronous Replication](https://cloud.google.com/compute/docs/disks/async-pd/about), and requires the use of a machine template to faciliate the creation of Windows servers.  A sample gcloud command is included in setup\templatefiles.
+This code will facilitate the creation of 10 VMs that will auto-join a domain, a DR failover, and a failback.  The domain controller was built manually to support this solution, and should be created first if wishing to test with one.  This repo contains the code to build the secondary boot disk and establish the asyncrhonous replication for the manually created domain controller.  This solution uses [Persistent Disk Asynchronous Replication](https://cloud.google.com/compute/docs/disks/async-pd/about), and requires the use of an instance template to faciliate the creation of Windows servers.  A sample gcloud command is included in setup\templatefiles.
 
 VPC networks, subnets, peerings, and Cloud DNS configurations are not provided with this code at this time, but can be referenced in the architecture diagram below.
 
@@ -30,7 +30,7 @@ Contains code to spin up failback/production servers using the replicated disks 
 # How to Setup the Environment
 ***As mentioned above, a domain controller can be used in testing.  If wishing to use one, please manually create one first, then proceed to the steps below.  If not using a domain controller, you will need to comment out lines 26-32 in prod-async-rep.tf and lines 54 to 87 in prod-sec-boot-disks.tf.***
 
-1. Set up a machine template -- a sample gcloud command is located in \setup\templatefiles
+1. Set up an instance template -- a sample gcloud command is located in \setup\templatefiles
 2. Navigate to the \setup folder
 3. Populate the .tfvars file with your values
 4. Navigate to the templatefiles folder and update `ad-join.tpl` with your values (or use your own domain join script)
