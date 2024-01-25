@@ -77,7 +77,7 @@ The following IAM Roles are required for this demo
 # Building The Test Servers
 
 > [!IMPORTANT]
-> If you are not using a Domain Controller to test, please comment out lines `26-32` in `prod-async-rep.tf` and lines `54-87` in `prod-sec-boot-disks.tf`
+> If you are not using a Domain Controller to test, please comment out lines `26-32` in `prod-async-rep.tf` and lines `54-87` in `prod-async-boot-disks.tf`
 
 1. [Create an Instance template](https://cloud.google.com/compute/docs/instance-templates/create-instance-templates) in the Service Project for Production
     - A sample `gcloud` command has been provided in the **/setup/templatefiles** folder for your convenience

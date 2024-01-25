@@ -37,12 +37,7 @@ variable "app-prod-service-account" {
   description = "The email address of the production GCE service account"
 }
 
-variable "app-prod-service-account-scopes" {
-  type        = string
-  description = "The scopes for the production GCE service account"
-}
-
-variable "app-prod-ip-subnet" {
+variable "app-prod-ip-subnet-self-link" {
   type        = string
   description = "The subnet to associate the production app servers with"
 }
