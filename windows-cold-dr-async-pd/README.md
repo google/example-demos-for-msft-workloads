@@ -51,7 +51,7 @@ The following IAM Roles are required for this demo
     - Project #1: Shared VPC Host Project
     - Project #2: Service Project for Production
     - Project #3: Service Project for DR
-2. Create three (3) VPCs in the **Shared VPC Host Project** c
+2. Create three (3) VPCs in the **Shared VPC Host Project**
     - VPC #1: Shared Services VPC as `shared-svcs` 
     - VPC #2: Production VPC as `app-prod` 
     - VPC #3: DR VPC as `app-dr`
