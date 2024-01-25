@@ -84,27 +84,28 @@ The following IAM Roles are required for this demo
 2. Navigate to the **/setup** folder and populate the `terraform.tfvars` file with your environment values
     - If you are using a Domain Controller, navigate to the **/setup/templatefiles** folder and update `ad-join.tpl` with your values. 
 3. While in the **/setup** directory run the terraform commands
-    `terraform init` 
-    `terraform plan out tf.out` (there should be 42 resources to add)
-    `terrafor apply tf.out`  
+    - `terraform init` 
+    - `terraform plan out tf.out` (there should be 42 resources to add)
+    - `terraform apply tf.out`  
 
-     The default configuration will deploy 
-     - Ten (10) Windows Servers (Domain joined if configured) 
-     - Secondary boot disks in the DR Project
-     - Async replication to DR
+   The default configuration will deploy 
+    - Ten (10) Windows Servers (Domain joined if configured) 
+    - Secondary boot disks in the DR Project
+    - Async replication to DR
 
 > [!NOTE]
-> Please allow 15-20 minutes for initial replication to complete. If using your own systems with larger disks, initial replication time may be longer. 
-> The initial replication is complete when the `disk/async_replication/time_since_last_replication` metric is available in Cloud Monitoring.
+> Please allow 15-20 minutes for initial replication to complete. If using your own systems with larger disks, initial replication time may be longer. The initial replication is complete when the `disk/async_replication/time_since_last_replication` metric is available in Cloud Monitoring.
 
 4. Navigate to the **/dr** folder and update the `terraform.tfvars` file with repsective values to prepare for DR
 5. While in the **/setup** directory run the terraform commands
-    `terraform init` 
-    `terraform plan out tf.out` (there should be 11 resources to add)
-    `terrafor apply tf.out`  
+    - `terraform init` 
+    - `terraform plan out tf.out` (there should be 11 resources to add)
+    - `terraform apply tf.out`  
 
 # DR Failover
-***If not using a domain controller, you will need to comment out lines 26-32 in stage-failback-async-rep.tf and lines 18, 54 to 88 in stage-failback-async-boot-disks.tf.***
+
+> [!IMPORTANT]
+> If you are not using a Domain Controller to test, please comment out lines `26-32` in `stage-failback-async-rep.tf` and lines `18, 54-88` in `stage-failback-async-boot-disks.tf`
 
 1. Simulate a DR event (e.g. shut down the production VMs)
 2. Navigate to the \setup folder and rename `prod-async-rep.tf` to `prod-async-rep.tf.dr`
