@@ -104,7 +104,8 @@ Start-Sleep(5)
 Start-WebAppPool -Name "DefaultAppPool"
 
 #Download Sample Web App
-Start-BitsTransfer -Source "${sample_website_url}" -Destination "C:\samplewebapp.zip"
+#Start-BitsTransfer -Source "${sample_website_url}" -Destination "C:\samplewebapp.zip"
+Invoke-WebRequest -Uri "${sample_website_url}" -Outfile "C:\samplewebapp.zip"
 
 #Extract Web App
 Expand-Archive C:\samplewebapp.zip C:\inetpub\wwwroot\
