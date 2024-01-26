@@ -24,6 +24,7 @@ resource "google_compute_disk_async_replication" "failback-async-replication" {
 }
 
 resource "google_compute_disk_async_replication" "failback-async-replication-for-dc" {
+  count = var.use-domain-controller ? 1 : 0
   depends_on   = [google_compute_disk.failback-sec-boot-disk-for-dc]
   primary_disk = "projects/${var.app-dr-project}/zones/${var.app-dr-dc-zone}/disks/${var.app-dc-gce-display-name}-secboot"
   secondary_disk {

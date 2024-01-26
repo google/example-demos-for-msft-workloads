@@ -29,13 +29,19 @@ resource "google_compute_instance" "dr-vms" {
   }
 
   network_interface {
-    subnetwork = var.app-dr-subnet
+    subnetwork = var.app-dr-ip-subnet-self-link 
     network_ip = data.terraform_remote_state.app_server_ip.outputs.app_server_ip[each.value.vm_order]
   }
 
+  shielded_instance_config {
+    enable_secure_boot          = true
+    enable_vtpm                 = true
+    enable_integrity_monitoring = true
+  }
+
   service_account {
-    email  = var.app-dr-sa
-    scopes = var.app-dr-sa-scopes
+    email  = var.app-dr-service-account
+    scopes = ["cloud-platform"]
   }
 
   allow_stopping_for_update = true
@@ -43,6 +49,7 @@ resource "google_compute_instance" "dr-vms" {
 }
 
 resource "google_compute_instance" "dr-dc" {
+  count = var.use-domain-controller ? 1 : 0
   name         = var.app-dc-gce-display-name
   machine_type = var.app-dc-machine-type
   zone         = var.app-dr-dc-zone
@@ -55,13 +62,19 @@ resource "google_compute_instance" "dr-dc" {
   }
 
   network_interface {
-    subnetwork = var.app-dr-subnet
+    subnetwork = var.app-dr-ip-subnet-self-link 
     network_ip = var.app-dr-dc-ip
   }
 
+  shielded_instance_config {
+    enable_secure_boot          = true
+    enable_vtpm                 = true
+    enable_integrity_monitoring = true
+  }
+
   service_account {
-    email  = var.app-dr-sa
-    scopes = var.app-dr-sa-scopes
+    email  = var.app-dr-service-account
+    scopes = ["cloud-platform"]
   }
 
   allow_stopping_for_update = true

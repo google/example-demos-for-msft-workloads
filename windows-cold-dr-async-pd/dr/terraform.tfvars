@@ -17,27 +17,40 @@
 ####################
 ### DR Variables ###
 ####################
-app-dr-project = ""
 
-app-dr-subnet = ""
+use-domain-controller = false
+# Default value is FALSE
+# Set value to TRUE if you plan to manually build a Domain Controller as part of the demo
 
-app-dr-sa = ""
+app-dr-project = "REPLACE_WITH_SERVICE_PROJECT_FOR_DR_PROJECT_ID"
 
-app-dr-sa-scopes = [""]
+app-dr-ip-subnet-self-link = "REPLACE_WITH_IP_SUBNET_FOR_PROD_SELF_LINK"
+# Run this gcloud command to get the self link
+# > gcloud compute networks subnets describe dr-app-us-east4 --region=us-central1 --project=REPLACE_WITH_YOUR_SHARED_VPC_PROJECT_ID --format="value(selfLink)"
+
+app-dr-service-account = "REPLACE_WITH_COMPUTE_ENGINE_DEFAULT_SERVICE_ACCOUNT"
+# Run this gcloud command to get the Service Account
+# > gcloud iam service-accounts list --project=REPLACE_WITH_SERVICE_PROJECT_FOR_DR_PROJECT_ID
 
 app-dc-gce-display-name = ""
+# Leave the variable value as blank if you are not using a Domain Controller
 
 app-dc-disk-type = ""
+# Leave the variable value as blank if you are not using a Domain Controller
 
 app-dc-machine-type = ""
+# Leave the variable value as blank if you are not using a Domain Controller
 
 app-dr-dc-ip = ""
+# Leave the variable value as blank if you are not using a Domain Controller
 
 app-dr-dc-zone = ""
+# Leave the variable value as blank if you are not using a Domain Controller
 
 #####################################
 ### Failback/Production Variables ###
 #####################################
-app-prod-project = ""
+app-prod-project = "REPLACE_WITH_SERVICE_PROJECT_FOR_PRODUCTION_PROJECT_ID"
 
 app-prod-dc-zone = ""
+# Leave the variable value as blank if you are not using a Domain Controller

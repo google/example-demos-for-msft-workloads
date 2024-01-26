@@ -17,6 +17,11 @@
 ######################
 ### Prod Variables ###
 ######################
+
+use-domain-controller = false
+# Default value is FALSE
+# Set value to TRUE if you plan to manually build a Domain Controller as part of the demo
+
 app-prod-project = "REPLACE_WITH_SERVICE_PROJECT_FOR_PRODUCTION_PROJECT_ID"
 
 app-prod-region = "REPLACE_WITH_PRODUCTION_REGION"
@@ -36,19 +41,15 @@ app-prod-ip-subnet-self-link = "REPLACE_WITH_IP_SUBNET_FOR_PROD_SELF_LINK"
 
 app-dc-gce-display-name = ""
 # Leave the variable value as blank if you are not using a Domain Controller
-# Don't forget to comment out the lines in the prod-async-rep.tf and prod-async-boot-disks.tf files
 
 app-prod-dc-disk-selflink = ""
 # Leave the variable value as blank if you are not using a Domain Controller
-# Don't forget to comment out the lines in the prod-async-rep.tf and prod-async-boot-disks.tf files
 
 app-dc-disk-type = ""
 # Leave the variable value as blank if you are not using a Domain Controller
-# Don't forget to comment out the lines in the prod-async-rep.tf and prod-async-boot-disks.tf files
 
 app-prod-dc-zone = ""
 # Leave the variable value as blank if you are not using a Domain Controller
-# Don't forget to comment out the lines in the prod-async-rep.tf and prod-async-boot-disks.tf files
 
 ####################
 ### DR Variables ###
@@ -60,4 +61,3 @@ app-dr-region = "REPLACE_WITH_DR_REGION"
 
 app-dr-dc-zone = ""
 # Leave the variable value as blank if you are not using a Domain Controller
-# Don't forget to comment out the lines in the prod-async-rep.tf and prod-async-boot-disks.tf files

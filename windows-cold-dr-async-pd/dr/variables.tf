@@ -17,6 +17,12 @@
 ####################
 ### DR Variables ###
 ####################
+
+variable "use-domain-controller" {
+  type = bool
+  description = "Set value to TRUE if you plan to manually build a Domain Controller as part of the demo. The default value will be set to FALSE"
+}
+
 variable "app-dr-project" {
   type        = string
   description = "The DR project"
@@ -47,14 +53,9 @@ variable "app-dr-dc-ip" {
   description = "The DR domain controller IP"
 }
 
-variable "app-dr-sa" {
+variable "app-dr-service-account" {
   type        = string
   description = "The DR GCE service account"
-}
-
-variable "app-dr-sa-scopes" {
-  type        = list(any)
-  description = "The DR GCE service account scopes"
 }
 
 variable "app-dr-dc-zone" {

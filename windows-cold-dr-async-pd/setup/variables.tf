@@ -17,6 +17,12 @@
 ######################
 ### Prod Variables ###
 ######################
+
+variable "use-domain-controller" {
+  type = bool
+  description = "Set value to TRUE if you plan to manually build a Domain Controller as part of the demo. The default value will be set to FALSE"
+}
+
 variable "app-prod-project" {
   type        = string
   description = "The production project"

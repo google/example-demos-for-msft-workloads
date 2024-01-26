@@ -24,9 +24,10 @@ resource "google_compute_disk_async_replication" "dr-async-replication" {
 }
 
 resource "google_compute_disk_async_replication" "dr-async-replication-for-dc" {
+  count = var.use-domain-controller ? 1 : 0
   depends_on   = [google_compute_disk.dr-sec-boot-disk-for-dc]
   primary_disk = var.app-prod-dc-disk-selflink
   secondary_disk {
-    disk = google_compute_disk.dr-sec-boot-disk-for-dc.id
+    disk = google_compute_disk.dr-sec-boot-disk-for-dc[count.index].id
   }
 }
