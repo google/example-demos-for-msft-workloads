@@ -29,7 +29,7 @@ resource "google_compute_instance" "dr-vms" {
   }
 
   network_interface {
-    subnetwork = var.app-dr-ip-subnet-self-link 
+    subnetwork = var.app-dr-ip-subnet-self-link
     network_ip = data.terraform_remote_state.app_server_ip.outputs.app_server_ip[each.value.vm_order]
   }
 
@@ -62,7 +62,7 @@ resource "google_compute_instance" "dr-dc" {
   }
 
   network_interface {
-    subnetwork = var.app-dr-ip-subnet-self-link 
+    subnetwork = var.app-dr-ip-subnet-self-link
     network_ip = var.app-dr-dc-ip
   }
 

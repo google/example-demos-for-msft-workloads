@@ -43,7 +43,7 @@ variable "app-dc-machine-type" {
   description = "The DR domain controller machine type"
 }
 
-variable "app-dr-subnet" {
+variable "app-dr-ip-subnet-self-link" {
   type        = string
   description = "The DR subnet"
 }

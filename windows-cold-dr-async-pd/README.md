@@ -83,7 +83,10 @@ gcloud compute networks peerings create prod-vpc-to-shared-svcs-vpc \
 --peer-network=shared-svcs
 
 # Run this command to verify that the new Peerings are showing as ACTIVE
-gcloud compute networks peerings list --project=$shared_vpc_host_project --flatten="peerings[]" --format="table(peerings.name,peerings.state)"
+gcloud compute networks peerings list \
+--project=$shared_vpc_host_project \
+--flatten="peerings[]" \
+--format="table(peerings.name,peerings.state)"
 ```
 
 7. [Enable the Shared VPC Host Project](https://cloud.google.com/vpc/docs/provisioning-shared-vpc#enable-shared-vpc-host)
@@ -101,11 +104,11 @@ gcloud compute networks peerings list --project=$shared_vpc_host_project --flatt
 
 1. [Create an Instance template](https://cloud.google.com/compute/docs/instance-templates/create-instance-templates) in the Service Project for Production
     - A sample `gcloud` command has been provided in the **/setup/templatefiles** folder for your convenience
-2. Navigate to the **/setup** folder and populate the `terraform.tfvars` file with your environment values
+2. Navigate to the **/setup** folder and update the `terraform.tfvars` file with the appropriate variables for your environment
     - If you are using a Domain Controller, navigate to the **/setup/templatefiles** folder and update `ad-join.tpl` with your values. 
 3. While in the **/setup** directory run the terraform commands
     - `terraform init` 
-    - `terraform plan out tf.out` (there should be 42 resources to add)
+    - `terraform plan -out tf.out` (there should be 42 resources to add)
     - `terraform apply tf.out`  
 
    The default configuration will deploy 
@@ -116,7 +119,11 @@ gcloud compute networks peerings list --project=$shared_vpc_host_project --flatt
 > [!NOTE]
 > Please allow 15-20 minutes for initial replication to complete. If using your own systems with larger disks, initial replication time may be longer. The initial replication is complete when the `compute.googleapis.com/disk/async_replication/time_since_last_replication` metric is available in Cloud Monitoring.
 
-```
+```mql
+# Open Cloud Monitoring > Metrics expolorer > Click on "< > MQL" on the top right > Paste the following MQL
+# If nothing loads it means that replication has not taken place yet. 
+# You can enable auto-refresh by clicking the button right next to "SAVE CHART"
+
 fetch gce_disk
 | metric
     'compute.googleapis.com/disk/async_replication/time_since_last_replication'
@@ -128,12 +135,6 @@ fetch gce_disk
     [value_time_since_last_replication_mean_aggregate:
        aggregate(value_time_since_last_replication_mean)]
 ```
-
-4. Navigate to the **/dr** folder and update the `terraform.tfvars` file with repsective values to prepare for DR
-5. While in the **/setup** directory run the terraform commands
-    - `terraform init` 
-    - `terraform plan out tf.out` (there should be 11 resources to add)
-    - `terraform apply tf.out`  
 
 # DR Failover
 
@@ -154,14 +155,17 @@ done
 2. Navigate to the **/setup** folder and rename `prod-async-rep.tf` to `prod-async-rep.tf.dr`. 
    While in the **/setup** directory run the terraform commands to stop the asynchronous replication.
     - `terraform init` 
-    - `terraform plan out tf.out` (there should be 10 or 11 resources to destroy)
+    - `terraform plan -out tf.out` (there should be 10 or 11 resources to destroy)
     - `terraform apply tf.out`  
-4. Sever the Peering from the `shared-svcs` VPC to the `prod-vpc` VPC and establish a VPC Peering from the `shared-svcs` VPC to the `dr-vpc` VPC
+3. Sever the Peering from the `shared-svcs` VPC to the `prod-vpc` VPC and establish a VPC Peering from the `shared-svcs` VPC to the `dr-vpc` VPC
 
 ```bash
 export shared_vpc_host_project="REPLACE_WITH_SHARED_VPC_HOST_PROJECT_PROJECT_ID"
 
-gcloud compute networks peerings delete "shared-svcs-vpc-to-prod-vpc" --network=shared-svcs --project=$shared_vpc_host_project
+# Sever the Peering to prod-vpc
+gcloud compute networks peerings delete "shared-svcs-vpc-to-prod-vpc" \
+--project=$shared_vpc_host_project \
+--network=shared-svcs
 
 # Create VPC Peering between shared-svcs and dr-vpc
 gcloud compute networks peerings create shared-svcs-vpc-to-dr-vpc \
@@ -176,21 +180,58 @@ gcloud compute networks peerings create dr-vpc-to-shared-svcs-vpc \
 --peer-network=shared-svcs
 
 # Run this command to verify that the new Peerings are showing as ACTIVE
-gcloud compute networks peerings list --project=$shared_vpc_host_project --flatten="peerings[]" --format="table(peerings.name,peerings.state)"
+gcloud compute networks peerings list \
+--project=$shared_vpc_host_project \
+--flatten="peerings[]" \
+--format="table(peerings.name,peerings.state)"
 ```
-5. Navigate to the **/dr** folder.
-   While in the **/setup** directory run the terraform commands to create the DR VMs using the replicated disks from Production
+4. Navigate to the **/dr** folder and update the `terraform.tfvars` file with the appropriate variables for your environment
+5. While in the **/dr** folder, run the terraform commands to create the DR VMs using the replicated disks from Production
     - `terraform init` 
-    - `terraform plan out tf.out` (there should be 10 or 11 resources to create)
+    - `terraform plan -out tf.out` (there should be 10 or 11 resources to create)
     - `terraform apply tf.out`  
 6. Validate all servers and applications are back online and connected to the domain
+
 7. Delete the old production VMs and their disks
+```bash
+export app_prod_project="REPLACE_WITH_SERVICE_PROJECT_FOR_PRODUCTION_PROJECT_ID"
+export zone=$(gcloud compute instances list --project=$app_prod_project --format="value(zone.basename())" | head -n 1)
+for gce_instance in $(gcloud compute instances list --project=$app_prod_project --format="value(selfLink.basename())")
+do
+	gcloud compute instances delete $gce_instance --zone $zone --project=$app_prod_project --quiet
+done
+```
+
 8. Rename `stage-failback-async-boot-disks.tf.dr` to `stage-failback-async-boot-disks.tf` and `stage-failback-async-rep.tf.dr` to `stage-failback-async-rep.tf`
-9. Run `terraform plan` to check for errors (should see 22 resources to add), then `terraform apply` to create new boot disks in the production region for failback, and the associated async replication pairs from DR
-    - Allow 15-20 minutes for initial replication to complete
-    - If using your own systems with larger disks, initial replication time may be longer. The initial replication is complete when the disk/async_replication/time_since_last_replication metric is available in Cloud Monitoring.
-10. Navigate to the \failback folder and update the .tfvars files with repsective values to prepare for production failback
-11. Run `terraform init` and `terraform plan` (should see 11 resources to add) and fix any problems to speed up failback
+9. While in the **/dr** folder, run the terraform commands to create new boot disks in the Production region for failback, and the associated async replication pairs from DR
+    - `terraform plan -out tf.out` (should see 22 resources to add)
+    - `terraform apply tf.out`  
+
+> [!NOTE]
+> Please allow 15-20 minutes for initial replication to complete. If using your own systems with larger disks, initial replication time may be longer. The initial replication is complete when the `compute.googleapis.com/disk/async_replication/time_since_last_replication` metric is available in Cloud Monitoring.
+
+```mql
+# Open Cloud Monitoring > Metrics expolorer > Click on "< > MQL" on the top right > Paste the following MQL
+# If nothing loads it means that replication has not taken place yet. 
+# You can enable auto-refresh by clicking the button right next to "SAVE CHART"
+
+fetch gce_disk
+| metric
+    'compute.googleapis.com/disk/async_replication/time_since_last_replication'
+| group_by 1m,
+    [value_time_since_last_replication_mean:
+       mean(value.time_since_last_replication)]
+| every 1m
+| group_by [],
+    [value_time_since_last_replication_mean_aggregate:
+       aggregate(value_time_since_last_replication_mean)]
+```
+
+10. Navigate to the **/failback** folder and update the `terraform.tfvars` file with the appropriate variables for your environment to prepare for production failback
+11. While in the **/failback** folder, run the terraform commands
+    - `terraform init` 
+    - `terraform plan -out tf.out` (there should be 10 or 11 resources to create)
+    - `terraform apply tf.out`
 
 # Production Failback
 ***If not using a domain controller, you will need to comment out lines 26-32 in restage-dr-async-rep.tf and lines 18, 54 to 88 in dr-east-sec-boot-disks.tf.***
