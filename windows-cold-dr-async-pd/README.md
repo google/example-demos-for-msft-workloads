@@ -104,8 +104,10 @@ gcloud compute networks peerings list \
 
 1. [Create an Instance template](https://cloud.google.com/compute/docs/instance-templates/create-instance-templates) in the Service Project for Production
     - A sample `gcloud` command has been provided in the **/setup/templatefiles** folder for your convenience
+
 2. Navigate to the **/setup** folder and update the `terraform.tfvars` file with the appropriate variables for your environment
     - If you are using a Domain Controller, navigate to the **/setup/templatefiles** folder and update `ad-join.tpl` with your values. 
+
 3. While in the **/setup** directory run the terraform commands
     - `terraform init` 
     - `terraform plan -out tf.out` (there should be 42 resources to add)
@@ -157,6 +159,7 @@ done
     - `terraform init` 
     - `terraform plan -out tf.out` (there should be 10 or 11 resources to destroy)
     - `terraform apply tf.out`  
+
 3. Sever the Peering from the `shared-svcs` VPC to the `prod-vpc` VPC and establish a VPC Peering from the `shared-svcs` VPC to the `dr-vpc` VPC
 
 ```bash
@@ -185,14 +188,18 @@ gcloud compute networks peerings list \
 --flatten="peerings[]" \
 --format="table(peerings.name,peerings.state)"
 ```
+
 4. Navigate to the **/dr** folder and update the `terraform.tfvars` file with the appropriate variables for your environment
+
 5. While in the **/dr** folder, run the terraform commands to create the DR VMs using the replicated disks from Production
     - `terraform init` 
     - `terraform plan -out tf.out` (there should be 10 or 11 resources to create)
     - `terraform apply tf.out`  
+
 6. Validate all servers and applications are back online and connected to the domain
 
 7. Delete the old production VMs and their disks
+
 ```bash
 export app_prod_project="REPLACE_WITH_SERVICE_PROJECT_FOR_PRODUCTION_PROJECT_ID"
 export zone=$(gcloud compute instances list --project=$app_prod_project --format="value(zone.basename())" | head -n 1)
@@ -203,6 +210,7 @@ done
 ```
 
 8. Rename `stage-failback-async-boot-disks.tf.dr` to `stage-failback-async-boot-disks.tf` and `stage-failback-async-rep.tf.dr` to `stage-failback-async-rep.tf`
+
 9. While in the **/dr** folder, run the terraform commands to create new boot disks in the Production region for failback, and the associated async replication pairs from DR
     - `terraform plan -out tf.out` (should see 22 resources to add)
     - `terraform apply tf.out`  
@@ -228,6 +236,7 @@ fetch gce_disk
 ```
 
 10. Navigate to the **/failback** folder and update the `terraform.tfvars` file with the appropriate variables for your environment to prepare for production failback
+
 11. While in the **/failback** folder, run the terraform commands
     - `terraform init` 
     - `terraform plan -out tf.out` (there should be 10 or 11 resources to create)
@@ -237,20 +246,31 @@ fetch gce_disk
 ***If not using a domain controller, you will need to comment out lines 26-32 in restage-dr-async-rep.tf and lines 18, 54 to 88 in dr-east-sec-boot-disks.tf.***
 
 1. Shut down DR VMs
+
 2. Navigate to the \dr folder
+
 3. Rename `stage-failback-async-rep.tf` to `stage-failback-async-rep.tf.dr`
+
 4. Run `terraform plan` to check for errors (should see 11 resources to destroy), then `terraform apply` to stop replication
+
 5. In the console, sever VPC peering from shared-svcs to DR, and establish VPC peering from shared-svcs to production
+
 6. Navigate to the \failback folder
+
 7. Run `terraform plan` to check for errors (should see 11 resources to add), then `terraform apply` to recover your VMs in the original production region using the replicated disks from DR
+
 8. Validate all servers and applications are back online and connected to the domain
+
 9. Delete the old DR VMs and their disks
+
 10. Rename `restage-dr-async-boot-disks.tf.failback` to `restage-dr-async-boot-disks.tf` and `restage-dr-async-rep.tf.failback` to `restage-dr-async-rep.tf`
+
 11. Run `terraform plan` to check for errors (should see 22 resources to add), then `terraform apply` to create new boot disks in the DR region, and the associated async replication pairs to prepare for the next DR event
     - Allow 15-20 minutes for initial replication to complete
     - If using your own systems with larger disks, initial replication time may be longer. The initial replication is complete when the disk/async_replication/time_since_last_replication metric is available in Cloud Monitoring.
 
 # Future DR and Failback Events
+
 In the case of future DR events, you would follow the steps in the _DR Failover_ section, with the following exceptions:
 
 2. Navigate to the ~~\setup~~ \failback folder and rename ~~`prod-async-rep.tf` to `prod-async-rep.tf.dr`~~ `restage-dr-async-rep.tf` to `restage-dr-async-rep.tf.failback`
