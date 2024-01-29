@@ -59,6 +59,45 @@ The function must have defined a set of environment variables. Details about the
 ## Setup and configuration - Cloud Function
 
 
+For the operations in this section below you need the following permissions:
+
+                cloudsql.instances.get
+                cloudsql.instances.list
+                storage.buckets.create
+                storage.buckets.get
+                storage.buckets.getIamPolicy
+                storage.buckets.setIamPolicy
+                storage.buckets.update
+                storage.buckets.list
+                iam.roles.create
+                iam.roles.delete
+                iam.roles.get
+                iam.roles.list
+                iam.roles.undelete
+                iam.roles.update
+                iam.serviceAccounts.create
+                iam.serviceAccounts.get
+                iam.serviceAccounts.list     
+                resourcemanager.projects.list
+                resourcemanager.projects.get
+                resourcemanager.projects.getIamPolicy
+                resourcemanager.projects.setIamPolicy
+
+and member of the following predefined roles:
+                
+                roles/cloudfunctions.developer
+
+
+or, your user must be member of the following predefined roles:
+
+                roles/cloudsql.editor
+                roles/storage.admin
+                roles/iam.roleAdmin
+                roles/iam.serviceAccountCreator
+                roles/resourcemanager.projectIamAdmin
+                roles/cloudfunctions.developer
+
+
 1. Create a GCS bucket to upload your transaction log backup files:
 
         gcloud storage buckets create gs://<BUCKET_NAME> \
@@ -124,6 +163,30 @@ Copy the value of the serviceAccountEmailAddress field. It should be something i
 
 ## Setup and configuration - Upload script
 
+
+For the operations in this section below you need the following permissions:
+
+                iam.serviceAccounts.create
+                iam.serviceAccounts.get
+                iam.serviceAccounts.list
+                iam.serviceAccountKeys.create
+                iam.serviceAccountKeys.delete
+                iam.serviceAccountKeys.disable
+                iam.serviceAccountKeys.enable
+                iam.serviceAccountKeys.get
+                iam.serviceAccountKeys.list
+                resourcemanager.projects.get
+                resourcemanager.projects.list
+                resourcemanager.projects.getIamPolicy
+                resourcemanager.projects.setIamPolicy
+
+or, your user must be member of the following predefined roles:
+
+                roles/iam.serviceAccountCreator
+                roles/iam.serviceAccountKeyAdmin
+                roles/resourcemanager.projectIamAdmin                
+
+
 To be able to run the powershell script on a regular basis, perform the following actions:
 
 1. First, create a service account that has rights to upload to the bucket:
@@ -156,6 +219,10 @@ Provide in the -Value parameter the name of the bucket where you want the backup
 Provide in the -Value parameter the full path to the key file that you generated earlier and saved locally on the machine where the script runs:
 
         New-Variable -Name GoogleAccountKeyFile -Value "" -Option Constant
+
+ Provide in the -Value parameter the name of the CloudSqlInstance. Optional. Alternativelly, it can be inferred from the name of the files:
+
+        New-Variable -Name CloudSqlInstanceName -Value "" -Option Constant
 
 1. Execute a command to create a scheduled task in Windows to run it on a regular basis. For example, the scheduled task below script starts execution at 2:45 PM and runs every 1 minute.
 

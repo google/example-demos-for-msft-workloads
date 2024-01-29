@@ -4,14 +4,18 @@ $currentDateTimeUtc = (Get-Date).ToUniversalTime()
 
 # Define the logic to set the content metadata the functions below. Exposed in functions for visibility and convenience.
 function Get-CloudSqlInstance-MetadataTag {
-  param ($file)
+  param ($file, $CloudSqlInstance)
+  
+  If ($CloudSqlInstance.Length -gt 0) {
+    return $CloudSqlInstance
+  }
 
-  #Fill in with the destination Cloud SQL for SQL Server instance name
-  return ""
+  return $file.Name.Split("_")[0]
+
 }
 
 function Get-DatabaseName-MetadataTag {
-  param ($file)  
+  param ($file)
   return $file.Directory.Name
 }
 
@@ -39,6 +43,9 @@ New-Variable -Name BucketName -Value "" -Option Constant
 
 #The full path to your google accout json key file. It is used by the script to authenticate against the bucket.
 New-Variable -Name GoogleAccountKeyFile -Value "" -Option Constant
+
+#The name of the Cloud SQL for SQL Server instance name. If provided, it will be used for metadata
+New-Variable -Name CloudSqlInstanceName -Value "" -Option Constant
 
 New-Variable -Name LogFile -Value "log.json" -Option Constant
 New-Variable -Name DateTimeFormat -Value "yyyy-MM-dd HH:mm:ss.fff" -Option Constant
@@ -83,7 +90,7 @@ if ($recentlyAddedFiles.Count -gt 0) {
   {
       try
       {        
-        $CloudSqlInstance = Get-CloudSqlInstance-MetadataTag $file
+        $CloudSqlInstance = Get-CloudSqlInstance-MetadataTag $file, $CloudSqlInstanceName
         $DatabaseName = Get-DatabaseName-MetadataTag $file
         $BackupType = Get-BackupType-MetadataTag $file
         $Recovery = Get-Recovery-MetadataTag $file
