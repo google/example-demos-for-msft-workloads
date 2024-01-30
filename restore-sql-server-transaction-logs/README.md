@@ -25,19 +25,18 @@ The upload event fires an EventArc trigger that calls the python function. The f
 
 After the execution of the import request, the function checks periodically the progress of the restore operation. Once the status of the operation changes to "DONE", which means that it has an outcome, the function executes the following:
 
-1. If the operation returns SUCCESS (determined by the absence of the 'error' element in the response json), then the function makes a copy of the backup file 'processed' storage bucket (if defined) and then finally deletes the file from the source storage bucket, thus signaling that the function processed the file successfully.
+1. If the operation returns SUCCESS (determined by the absence of the 'error' element in the response json), then the function makes a copy of the backup file 'processed' storage bucket (if defined) and then finally deletes the file from the source storage bucket, thus signaling that the function processed the file successfully. It then retuns an OK, finishing the execution.
 
 1. If the outcome of the operation returns ERROR, then depending on the details of the error response inside, the function implements one of the following decisions:
 
-    * If the import failed with SQL Server error 4326 - too early to apply to the database - then the function assumes that the log file was processed already and deletes it from the bucket. The function returns an OK (200).
+    * If the import failed with SQL Server error 4326 - too early to apply to the database - then the function assumes that the log file was processed already and deletes it from the bucket. The function returns an OK, finishing the exection.
 
-    * If the import failed with SQL Server error 4305 - too recent to apply to the database - the function assumes that there are some synchronization and schedules a later restore attempt of the same file, in the same execution run. The MAX_REQUEST_ATTEMPTS configuration parameter defines the maximum number of such retry attempts.  In this case, the function does not delete the file from the source bucket. In this way the function tries to compensate any upload order issues - for example later transaction log backups uploaded before earlier ones.
-
-    * If the import fails for any other reason, the function schedules a later restore attempt in the same execution. The file is not deleted in case of errors.
-
-If the function breaks mid-way, the log backup file will not be deleted from the source bucket (regardless if it was restored to the CloudSQL instance or not). This signifies that it was not processed successfully and that it should be manually scheduled for re-upload.
+    * If the import failed with SQL Server error 4305 - too recent to apply to the database - the function assumes that there are some synchronization issues and returns a runtime error. It does not delete the log backup file from the source bucket and it relies on the retry mechanism - the same import is retried later (up to a maximum of 7 days) in a new function execution.    
+    
+    * If the import fails for any other reason or if the function breaks mid-way, the function fails and returns a runtime error, relying on a the retry mechanism that schedules a later attempt in a new execution. The file is not deleted from the source bucket.or not) and the retry mechanism will schedule another exectuion.
 
 The function needs certain information to make the proper request to restore the uploaded backup file to the Cloud SQL for SQL Server instance. This information includes:
+
         - The Cloud SQL Instance name
         - The database name
         - The type of backup (full, differential or transaction log backup)
@@ -51,7 +50,6 @@ In case of fixed file name, make sure that you have the substrings "_full" or "_
 By default, the function restores backups with the norecovery option, leaving the database in a state to expect further sequential restores. Use the "_recovery" substring in the file name or set the Recovery tag to "True" in the object metadata. This is useful when you need to switching to your DR Cloud SQL instance. In such cases, the function must restore a backup file with the recovery option true. This triggers the recovery option and leaves the database in the accessible state.
 
 This repository also contains a powershell script for regularly uploading new files to cloud storage called upload-script.ps1, existing in the scheduled-upload folder. This provides an automated way of uploading the backup files logs to cloud storage.
-
 
 The function must have defined a set of environment variables. Details about them are described below, in the constraints section.
 
@@ -87,7 +85,6 @@ and member of the following predefined roles:
                 
                 roles/cloudfunctions.developer
 
-
 or, your user must be member of the following predefined roles:
 
                 roles/cloudsql.editor
@@ -99,17 +96,19 @@ or, your user must be member of the following predefined roles:
 
 
 1. Create a GCS bucket to upload your transaction log backup files:
+        
+        export PROJECT_ID=`gcloud config get-value project`
 
         gcloud storage buckets create gs://<BUCKET_NAME> \
-        --project=<project-id> \
-        --location=BUCKET_LOCATION \
+        --project= ${PROJECT_ID} \
+        --location=<BUCKET_LOCATION> \
         --public-access-prevention
 
 1. Use the gcloud describe command to get the service account information of your Cloud SQL Instance
 
         gcloud sql instances describe <CLOUD_SQL_INSTANCE_NAME>
 
-Copy the value of the serviceAccountEmailAddress field. It should be something in the form of p******@gcp-sa-cloud-sql.iam.gserviceaccount.com.
+Copy the value of the serviceAccountEmailAddress field. It should be something in the form of p******@${PROJECT_ID}.iam.gserviceaccount.com.
 
 1. Grant objectViewer rights for the CloudSQL service account on the bucket you just created:
 
@@ -120,8 +119,6 @@ Copy the value of the serviceAccountEmailAddress field. It should be something i
         gcloud iam service-accounts create cloud-function-sql-restore-log --display-name "Service Account for Cloud Function and SQL Admin API"
 
 1. Create a role called Cloud SQL import that has rights to perform imports on Cloud SQL instances and can also orchestrate files on the buckets:
-
-        export PROJECT_ID=`gcloud config get-value project`
 
         gcloud iam roles create cloud.sql.importer \
         --project ${PROJECT_ID} \
@@ -148,11 +145,12 @@ Copy the value of the serviceAccountEmailAddress field. It should be something i
         gcloud functions deploy <YOUR_FUNCTION_NAME> \
         --gen2 \
         --region=<YOUR_REGION> \
+        --retry \
         --runtime=<YOUR_RUNTIME> \
         --source=<YOUR_SOURCE_LOCATION> \
-        --entry-point=<YOUR_CODE_ENTRYPOINT> \
-        --set-env-vars USE_FIXED_FILE_NAME_FORMAT=False,PROCESSED_BUCKET_NAME=,MAX_REQUEST_ATTEMPTS=5,MAX_REQUEST_FETCH_TIME_SECONDS=5,MAX_OPERATION_FETCH_TIME_SECONDS=5
-        --service-account cloud-function-sql-restore-log@alexcarciu-alloy-db-testing.iam.gserviceaccount.com
+        --entry-point=<YOUR_CODE_ENTRYPOINT> \        
+        --set-env-vars USE_FIXED_FILE_NAME_FORMAT=False,PROCESSED_BUCKET_NAME=,MAX_OPERATION_FETCH_TIME_SECONDS=30
+        --service-account cloud-function-sql-restore-log@${PROJECT_ID}.iam.gserviceaccount.com
 
 1. To invoke an authenticated cloud function, the underlying principal must have the invoker IAM permission. Assign the Invoker role (roles/run.invoker) through Cloud Run for 2nd gen functions to the function’s service account:
 
@@ -186,8 +184,7 @@ or, your user must be member of the following predefined roles:
                 roles/iam.serviceAccountKeyAdmin
                 roles/resourcemanager.projectIamAdmin                
 
-
-To be able to run the powershell script on a regular basis, perform the following actions:
+Powershell is the language of choice for the upload script because many SQL Server Database Administrators (DBAs) leverage PowerShell as a valuable tool to streamline and automate their tasks and efficiently manage database environments. PowerShell runs on Windows, Linux, and macOS.
 
 1. First, create a service account that has rights to upload to the bucket:
 
@@ -245,13 +242,22 @@ For more information about service account keys, see [Create a service account k
 
 1. The transaction log backup files are uploaded on a continuous, regular and batched manner to the cloud storage bucket. Ideally, the upload of the transaction log files happens in the same order as their creation time so that there is a constant, ordered stream of files being uploaded. In case of multiple files uploaded at the same time, race conditions could happen and some backups might not be processed as they are too late for restore.
 
+1. The function uses the [retry mechanism] (https://cloud.google.com/functions/docs/bestpractices/retries). When the function encounters a generic error or if the import fails because of the too recent to apply to the database SQL error, the retry mechanism schedules a new function execution, until it gets back a return OK (200), for up to 7 days. To manually Stop the retries, deploy again the function without the --retry flag.
+
+1. The function uses Environment variables. If these are not provided, default value are assigned to certain settings:
+
+        USE_FIXED_FILE_NAME_FORMAT = Default False if not set to "True" or "False".
+        PROCESSED_BUCKET_NAME = Default empty string, no copy to the processed backups bucket takes place.
+        MAX_OPERATION_FETCH_TIME_SECONDS = Default 30 seconds time to wait until the status of the restore operation is inquired.
+
 1. The function needs certain information to make the proper request to restore the uploaded backup file to the Cloud SQL for SQL Server instance. This information includes the Cloud SQL Instance name, database name, the type of backup (full, differential or transaction log backup) and if the backup is restored with recovery or not. There are two ways in which the function gets the necessary this information:
         
 - From the file name itself. To enable this functionality, set the USE_FIXED_FILE_NAME_FORMAT environment variable to "True". In this way, the function expects all the uploaded backup files to have a fixed name pattern from which it inferrs the needed information. The fixed file name pattern is:
 
-        <cloud-sql-instance-name>_<database-name>_[<backup_type>]_[<recovery>].*
+        <cloud-sql-instance-name>_<database-name>_[<backup_type>]_[<recovery>]_*.*
 
 - [cloud-sql-instance-name] - is the name of the cloud sql for sql server instance where the restore request is made. Mandatory when useing fixed file name option.
+
 - [database-name] - is the name of the database where the function executes the restore operation. Mandatory when useing fixed file name option.
 
 - [backup_type] - Optional. If the function finds the substring "_full" or "_diff" in the file name, it will execute a full respectively a diff restore. If there is no such substring, the function performs the default TLOG restore.
