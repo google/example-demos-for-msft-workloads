@@ -24,7 +24,7 @@ use-domain-controller = false
 
 app-dr-project = "REPLACE_WITH_SERVICE_PROJECT_FOR_DR_PROJECT_ID"
 
-app-dr-ip-subnet-self-link = "REPLACE_WITH_IP_SUBNET_FOR_PROD_SELF_LINK"
+app-dr-ip-subnet-self-link = "REPLACE_WITH_IP_SUBNET_FOR_DR_SELF_LINK"
 # Run this gcloud command to get the self link
 # > gcloud compute networks subnets describe dr-app-us-central1 --region=us-central1 --project=REPLACE_WITH_YOUR_SHARED_VPC_PROJECT_ID --format="value(selfLink)"
 

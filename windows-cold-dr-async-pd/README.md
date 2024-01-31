@@ -122,6 +122,7 @@ gcloud compute networks peerings list \
 > Please allow 15-20 minutes for initial replication to complete. If using your own systems with larger disks, initial replication time may be longer. The initial replication is complete when the `compute.googleapis.com/disk/async_replication/time_since_last_replication` metric is available in Cloud Monitoring.
 
 ```mql
+# --- From the Service Project for Production ---
 # Open Cloud Monitoring > Metrics expolorer > Click on "< > MQL" on the top right > Paste the following MQL
 # If nothing loads it means that replication has not taken place yet. 
 # You can enable auto-refresh by clicking the button right next to "SAVE CHART"
@@ -219,6 +220,7 @@ done
 > Please allow 15-20 minutes for initial replication to complete. If using your own systems with larger disks, initial replication time may be longer. The initial replication is complete when the `compute.googleapis.com/disk/async_replication/time_since_last_replication` metric is available in Cloud Monitoring.
 
 ```mql
+# --- From the Service Project for DR ---
 # Open Cloud Monitoring > Metrics expolorer > Click on "< > MQL" on the top right > Paste the following MQL
 # If nothing loads it means that replication has not taken place yet. 
 # You can enable auto-refresh by clicking the button right next to "SAVE CHART"
@@ -247,27 +249,91 @@ fetch gce_disk
 
 1. Shut down DR VMs
 
-2. Navigate to the \dr folder
+```bash
+export app_dr_project="REPLACE_WITH_SERVICE_PROJECT_FOR_DR_PROJECT_ID"
+export zone=$(gcloud compute instances list --project=$app_dr_project --format="value(zone.basename())" | head -n 1)
+for gce_instance in $(gcloud compute instances list --project=$app_dr_project --format="value(selfLink.basename())")
+do
+	gcloud compute instances stop $gce_instance --zone $zone --project=$app_dr_project
+done
+```
+
+2. Navigate to the **/dr** folder
 
 3. Rename `stage-failback-async-rep.tf` to `stage-failback-async-rep.tf.dr`
 
-4. Run `terraform plan` to check for errors (should see 11 resources to destroy), then `terraform apply` to stop replication
+4. While in the **/dr** folder, run the terraform commands to stop replication
+    - `terraform plan -out tf.out` (should see 11 resources to destroy)
+    - `terraform apply tf.out`  
 
-5. In the console, sever VPC peering from shared-svcs to DR, and establish VPC peering from shared-svcs to production
+5. In the console, sever VPC peering from `shared-svcs` to `dr-vpc`, and establish VPC peering from `shared-svcs` to `prod-vpc`
 
-6. Navigate to the \failback folder
+```bash
+export shared_vpc_host_project="REPLACE_WITH_SHARED_VPC_HOST_PROJECT_PROJECT_ID"
 
-7. Run `terraform plan` to check for errors (should see 11 resources to add), then `terraform apply` to recover your VMs in the original production region using the replicated disks from DR
+# Sever the Peering to dr-vpc
+gcloud compute networks peerings delete "shared-svcs-vpc-to-dr-vpc" \
+--project=$shared_vpc_host_project \
+--network=shared-svcs
+
+# Create VPC Peering between shared-svcs and prod-vpc
+gcloud compute networks peerings create shared-svcs-vpc-to-prod-vpc \
+--project=$shared_vpc_host_project \
+--network=shared-svcs \
+--peer-network=dr-vpc
+
+# Run this command to verify that the new Peerings are showing as ACTIVE
+gcloud compute networks peerings list \
+--project=$shared_vpc_host_project \
+--flatten="peerings[]" \
+--format="table(peerings.name,peerings.state)"
+```
+
+6. Navigate to the **/failback** folder
+
+7. While in the **/failback** folder, run the terraform commands to recover your VMs in the original production region using the replicated disks from DR
+    - `terraform plan -out tf.out` (should see 11 resources to add)
+    - `terraform apply tf.out`
 
 8. Validate all servers and applications are back online and connected to the domain
 
 9. Delete the old DR VMs and their disks
 
+```bash
+export app_dr_project="REPLACE_WITH_SERVICE_PROJECT_FOR_DR_PROJECT_ID"
+export zone=$(gcloud compute instances list --project=$app_dr_project --format="value(zone.basename())" | head -n 1)
+for gce_instance in $(gcloud compute instances list --project=$app_dr_project --format="value(selfLink.basename())")
+do
+	gcloud compute instances delete $gce_instance --zone $zone --project=$app_dr_project --quiet
+done
+```
+
 10. Rename `restage-dr-async-boot-disks.tf.failback` to `restage-dr-async-boot-disks.tf` and `restage-dr-async-rep.tf.failback` to `restage-dr-async-rep.tf`
 
-11. Run `terraform plan` to check for errors (should see 22 resources to add), then `terraform apply` to create new boot disks in the DR region, and the associated async replication pairs to prepare for the next DR event
-    - Allow 15-20 minutes for initial replication to complete
-    - If using your own systems with larger disks, initial replication time may be longer. The initial replication is complete when the disk/async_replication/time_since_last_replication metric is available in Cloud Monitoring.
+11. While in the **/failback** folder, run the terraform commands to re-create new boot disks in the DR region, and the associated async replication pairs to prepare for the next DR event
+    - `terraform plan -out tf.out` (should see 22 resources to add)
+    - `terraform apply tf.out`
+
+> [!NOTE]
+> Please allow 15-20 minutes for initial replication to complete. If using your own systems with larger disks, initial replication time may be longer. The initial replication is complete when the `compute.googleapis.com/disk/async_replication/time_since_last_replication` metric is available in Cloud Monitoring.
+
+```mql
+# --- From the Service Project for Production ---
+# Open Cloud Monitoring > Metrics expolorer > Click on "< > MQL" on the top right > Paste the following MQL
+# If nothing loads it means that replication has not taken place yet. 
+# You can enable auto-refresh by clicking the button right next to "SAVE CHART"
+
+fetch gce_disk
+| metric
+    'compute.googleapis.com/disk/async_replication/time_since_last_replication'
+| group_by 1m,
+    [value_time_since_last_replication_mean:
+       mean(value.time_since_last_replication)]
+| every 1m
+| group_by [],
+    [value_time_since_last_replication_mean_aggregate:
+       aggregate(value_time_since_last_replication_mean)]
+```
 
 # Future DR and Failback Events
 
