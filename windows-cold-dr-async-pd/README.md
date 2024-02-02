@@ -244,7 +244,9 @@ fetch gce_disk
     - `terraform apply tf.out`
 
 # Production Failback
-***If not using a domain controller, you will need to comment out lines 26-32 in restage-dr-async-rep.tf and lines 18, 54 to 88 in dr-east-sec-boot-disks.tf.***
+
+> [!IMPORTANT]
+> If you are not using a Domain Controller to test, please ensure that the `use-domain-controller` variable in `terraform.tfvars` is set to `false` AND comment out line `18` in `dr-east-sec-boot-disks.tf`
 
 1. Shut down DR VMs
 
@@ -336,14 +338,15 @@ fetch gce_disk
 
 # Future DR and Failback Events
 
-In the case of future DR events, you would follow the steps in the _DR Failover_ section, with the following exceptions:
+In the case of future DR events, you would follow the steps in the [DR Failover](#dr-failover) section, with the following exceptions:
 
-2. Navigate to the ~~\setup~~ \failback folder and rename ~~`prod-async-rep.tf` to `prod-async-rep.tf.dr`~~ `restage-dr-async-rep.tf` to `restage-dr-async-rep.tf.failback`
-9. Rename ~~`stage-failback-async-boot-disks.tf.dr` to `stage-failback-async-boot-disks.tf` and~~ `stage-failback-async-rep.tf.dr` to `stage-failback-async-rep.tf`
+1. Navigate to the ~~\setup~~ **/failback** folder and rename ~~`prod-async-rep.tf` to `prod-async-rep.tf.dr`~~ `restage-dr-async-rep.tf` to `restage-dr-async-rep.tf.failback`
 
-And similary, to failback, you would follow the steps in the _Production Failback_ section, with the following exceptions:
+2. Rename ~~`stage-failback-async-boot-disks.tf.dr` to `stage-failback-async-boot-disks.tf` and~~ `stage-failback-async-rep.tf.dr` to `stage-failback-async-rep.tf`
 
-10. Rename ~~`restage-dr-async-boot-disks.tf.failback` to `restage-dr-async-boot-disks.tf` and~~ `restage-dr-async-rep.tf.failback` to `restage-dr-async-rep.tf`
+And similary, to failback, you would follow the steps in the [Production Failback](#production-failback) section, with the following exceptions:
+
+3. Rename ~~`restage-dr-async-boot-disks.tf.failback` to `restage-dr-async-boot-disks.tf` and~~ `restage-dr-async-rep.tf.failback` to `restage-dr-async-rep.tf`
 
 # Cleanup
 

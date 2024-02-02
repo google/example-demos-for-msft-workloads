@@ -54,7 +54,7 @@ resource "google_compute_disk" "dr-sec-boot-disks-for-app-vms" {
 resource "google_compute_disk" "dr-sec-boot-disk-for-dc" {
   depends_on = [google_compute_instance.failback-dc]
   count = var.use-domain-controller ? 1 : 0
-  name       = "${var.app-dr-dc-gce-display-name}-secboot"
+  name       = "${var.app-dc-gce-display-name}-secboot"
   type       = var.app-dc-disk-type
   zone       = var.app-dr-dc-zone
   project    = var.app-dr-project

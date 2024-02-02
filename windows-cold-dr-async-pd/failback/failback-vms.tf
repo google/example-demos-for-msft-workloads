@@ -15,6 +15,7 @@
  */
 
 resource "google_compute_instance" "failback-dc" {
+  count = var.use-domain-controller ? 1 : 0
   name         = var.app-dc-gce-display-name
   machine_type = var.app-dc-machine-type
   zone         = var.app-prod-dc-zone
@@ -27,6 +28,12 @@ resource "google_compute_instance" "failback-dc" {
   network_interface {
     subnetwork = var.app-prod-ip-subnet-self-link
     network_ip = var.app-prod-dc-ip
+  }
+
+  shielded_instance_config {
+    enable_secure_boot          = true
+    enable_vtpm                 = true
+    enable_integrity_monitoring = true
   }
 
   service_account {
@@ -55,6 +62,12 @@ resource "google_compute_instance" "failback-vms" {
     network_ip = data.terraform_remote_state.app_server_ip.outputs.app_server_ip[each.value.vm_order]
   }
 
+  shielded_instance_config {
+    enable_secure_boot          = true
+    enable_vtpm                 = true
+    enable_integrity_monitoring = true
+  }
+  
   service_account {
     email  = var.app-prod-service-account
     scopes = ["cloud-platform"]
