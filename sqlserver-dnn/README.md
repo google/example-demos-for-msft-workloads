@@ -45,7 +45,9 @@ The Web Application and Database are based on the [Contoso University](https://g
 1. Create a new Google Cloud Project and make note of the **_Project ID_**
     - Do not enable any APIs
 
-2. Assign the IAM Roles listed below to the user that will be executing the code.
+2. Ensure that a [Billing Account](https://cloud.google.com/billing/docs/how-to/modify-project) is set for the Project
+
+3. Assign the IAM Roles listed below to the user that will be executing the code.
 
 ### IAM Requirements
 
@@ -171,7 +173,7 @@ To access the environment, follow these steps:
     - Click on the **_Students_** tab (it takes a few seconds to load) > Click on **_Create New_**
         * Create a new Student record to validate that the Database connection is working
           After the new Student is created, use the Search bar to check that the Student record exists
-terr
+
 3. For your convenience, SQL Server Management Studio is installed on the Web Server
     - Open SSMS from the Desktop shortcut
 
@@ -197,6 +199,7 @@ terr
         * Type the following query: `SELECT @@SERVERNAME` > Click on **_Execute_**
           Make note of the Server name (this is the **new** Primary in the AOAG)
 
+    - Repeat the steps to failback the AG to **_sql1_** using the Failover Wizard
 
 ### Simulated Database VM failure
 
