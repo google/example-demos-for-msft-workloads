@@ -25,13 +25,13 @@ resource "google_compute_instance" "failback-dc" {
   }
 
   network_interface {
-    subnetwork = var.app-prod-ip-subnet
+    subnetwork = var.app-prod-ip-subnet-self-link
     network_ip = var.app-prod-dc-ip
   }
 
   service_account {
     email  = var.app-prod-service-account
-    scopes = var.app-prod-service-account-scopes
+    scopes = ["cloud-platform"]
   }
 
   allow_stopping_for_update = true
@@ -51,13 +51,13 @@ resource "google_compute_instance" "failback-vms" {
   }
 
   network_interface {
-    subnetwork = var.app-prod-ip-subnet
+    subnetwork = var.app-prod-ip-subnet-self-link
     network_ip = data.terraform_remote_state.app_server_ip.outputs.app_server_ip[each.value.vm_order]
   }
 
   service_account {
     email  = var.app-prod-service-account
-    scopes = var.app-prod-service-account-scopes
+    scopes = ["cloud-platform"]
   }
 
   allow_stopping_for_update = true

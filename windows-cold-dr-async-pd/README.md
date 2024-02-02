@@ -157,7 +157,6 @@ done
 
 2. Navigate to the **/setup** folder and rename `prod-async-rep.tf` to `prod-async-rep.tf.dr`. 
    While in the **/setup** directory run the terraform commands to stop the asynchronous replication.
-    - `terraform init` 
     - `terraform plan -out tf.out` (there should be 10 or 11 resources to destroy)
     - `terraform apply tf.out`  
 

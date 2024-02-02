@@ -22,7 +22,7 @@ variable "app-prod-project" {
   description = "The failback/production project"
 }
 
-variable "app-prod-ip-subnet" {
+variable "app-prod-ip-subnet-self-link" {
   type        = string
   description = "The failback/production subnet"
 }
@@ -30,11 +30,6 @@ variable "app-prod-ip-subnet" {
 variable "app-prod-service-account" {
   type        = string
   description = "The failback/production GCE service account"
-}
-
-variable "app-prod-service-account-scopes" {
-  type        = list(any)
-  description = "The failback/production GCE service account scopes"
 }
 
 variable "app-prod-dc-zone" {
