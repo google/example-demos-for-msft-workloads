@@ -13,6 +13,14 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+###########################
+### Configure Variables ###
+###########################
+
+# Set this variable first in your command line interface
+# Bash
+# > export prod_project=REPLACE_WITH_SERVICE_PROJECT_FOR_PRODUCTION_PROJECT_ID
+# > export shared_vpc_project=REPLACE_WITH_YOUR_SHARED_VPC_PROJECT_ID
 
 #####################################
 ### Failback/Production Variables ###
@@ -26,11 +34,11 @@ app-prod-project = "REPLACE_WITH_SERVICE_PROJECT_FOR_PRODUCTION_PROJECT_ID"
 
 app-prod-ip-subnet-self-link = "REPLACE_WITH_IP_SUBNET_FOR_PROD_SELF_LINK"
 # Run this gcloud command to get the self link
-# > gcloud compute networks subnets describe prod-app-us-east4 --region=us-east4 --project=REPLACE_WITH_YOUR_SHARED_VPC_PROJECT_ID --format="value(selfLink)"
+# > gcloud compute networks subnets describe prod-app-us-east4 --region=us-east4 --project=$shared_vpc_project --format="value(selfLink)"
 
 app-prod-service-account = "REPLACE_WITH_COMPUTE_ENGINE_DEFAULT_SERVICE_ACCOUNT"
 # Run this gcloud command to get the Service Account
-# > gcloud iam service-accounts list --project=REPLACE_WITH_SERVICE_PROJECT_FOR_PRODUCTION_PROJECT_ID
+# > gcloud iam service-accounts list --project=$prod_project
 
 app-prod-dc-zone = "REPLACE_WITH_PRODUCTION_ZONE"
 # Default is us-east4-a

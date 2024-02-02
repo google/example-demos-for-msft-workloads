@@ -344,3 +344,14 @@ In the case of future DR events, you would follow the steps in the _DR Failover_
 And similary, to failback, you would follow the steps in the _Production Failback_ section, with the following exceptions:
 
 10. Rename ~~`restage-dr-async-boot-disks.tf.failback` to `restage-dr-async-boot-disks.tf` and~~ `restage-dr-async-rep.tf.failback` to `restage-dr-async-rep.tf`
+
+# Cleanup
+
+1. Navigate to the **/failback** folder
+    - `terraform destroy`
+
+2. Navigate to the **/dr** folder
+    - `terraform destroy`
+
+3. Navigate to the **/setup** folder
+    - `terraform destroy`
