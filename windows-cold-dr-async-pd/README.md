@@ -51,19 +51,18 @@ The following IAM Roles are required for this demo
     - Project #1: Shared VPC Host Project
     - Project #2: Service Project for Production
     - Project #3: Service Project for DR
+    - Enable Compute Engine, Cloud DNS, and Cloud IAP APIs in all three projects (you will have to switch between projects in gcloud)
+      > gcloud services enable compute.googleapis.com dns.googleapis.com iap.googleapis.com
 2. Create three (3) VPCs in the **Shared VPC Host Project**
-    - VPC #1: Shared Services VPC as `shared-svcs` 
-    - VPC #2: Production VPC as `app-prod` 
-    - VPC #3: DR VPC as `app-dr`
-3. In the `shared-svcs` VPC, create two (2) subnets
-    - Shared Services Subnet #1: `sn-shrdsvcs-us-east4` with IP range `10.0.0.0/21`
-    - Shared Services Subnet #2: `sn-shrdsvcs-us-central1` with IP range `10.20.0.0/21`
-4. In the `app-prod` VPC create one (1) subnet
-    - Production Subnet #1: `prod-app-us-east4` with IP range `10.1.0.0/21`
-5. In the `app-dr` VPC create one (1) subnet
-    - DR Subnet #1: `dr-app-us-central1` with IP range `10.1.0.0/21`
-      **_Note_** The IP range in DR is the same as Production
-6. Create a [VPC Peering configuration](https://cloud.google.com/vpc/docs/using-vpc-peering#creating_a_peering_configuration) between the `shared-svcs` VPC and `app-prod` VPC
+    - VPC #1: Shared Services VPC as `shared-svcs` with global routing
+        - Shared Services Subnet #1: `sn-shrdsvcs-us-east4` in `us-east4` with IP range `10.0.0.0/21` and Private Google Access enabled
+        - Shared Services Subnet #2: `sn-shrdsvcs-us-central1` in `us-central1` with IP range `10.20.0.0/21` and Private Google Access enabled
+    - VPC #2: Production VPC as `app-prod` with global routing
+        - Production Subnet #1: `prod-app-us-east4` in `us-east4` with IP range `10.1.0.0/21` and Private Google Access enabled
+    - VPC #3: DR VPC as `app-dr` with global routing
+        - DR Subnet #1: `dr-app-us-central1` in `us-central1` with IP range `10.1.0.0/21`and Private Google Access enabled
+        **_Note_** The IP range in DR is the same as Production
+3. Create a [VPC Peering configuration](https://cloud.google.com/vpc/docs/using-vpc-peering#creating_a_peering_configuration) between the `shared-svcs` VPC and `app-prod` VPC
     - You will also need to create a VPC Peering from the `app-prod` VPC to the `shared-svcs` VPC
     - **_Optional_** You can pre-stage the peering from the `app-dr` VPC to the `shared-svcs` VPC to save time in a DR event, but it is not required at this time.
 
@@ -74,12 +73,12 @@ export shared_vpc_host_project="REPLACE_WITH_SHARED_VPC_HOST_PROJECT_PROJECT_ID"
 gcloud compute networks peerings create shared-svcs-vpc-to-prod-vpc \
 --project=$shared_vpc_host_project \
 --network=shared-svcs \
---peer-network=prod-vpc
+--peer-network=app-prod
 
 # Create VPC Peering between prod-vpc and shared-svcs
 gcloud compute networks peerings create prod-vpc-to-shared-svcs-vpc \
 --project=$shared_vpc_host_project \
---network=prod-vpc \
+--network=app-prod \
 --peer-network=shared-svcs
 
 # Run this command to verify that the new Peerings are showing as ACTIVE
@@ -89,13 +88,13 @@ gcloud compute networks peerings list \
 --format="table(peerings.name,peerings.state)"
 ```
 
-7. [Enable the Shared VPC Host Project](https://cloud.google.com/vpc/docs/provisioning-shared-vpc#enable-shared-vpc-host)
-8. [Attach the Production and DR Service Projects](https://cloud.google.com/vpc/docs/provisioning-shared-vpc#create-shared)
+4. [Enable the Shared VPC Host Project](https://cloud.google.com/vpc/docs/provisioning-shared-vpc#enable-shared-vpc-host)
+5. [Attach the Production and DR Service Projects](https://cloud.google.com/vpc/docs/provisioning-shared-vpc#create-shared)
     - Ensure that you share `prod-app-us-east4` with the Production Project only
     - Ensure that you share `dr-app-us-central1` with the DR Project only
-9. In the Shared VPC Host Project, configure Cloud DNS per [best practices](https://cloud.google.com/compute/docs/instances/windows/best-practices) to support your domain and Active Directory.  You will need a forwarding zone for your domain associated with Shared Services, and DNS Peering from Shared Services to the other VPCs to support domain resolution.
+6. In the Shared VPC Host Project, configure Cloud DNS per [best practices](https://cloud.google.com/compute/docs/instances/windows/best-practices) to support your domain and Active Directory.  You will need a forwarding zone for your domain associated with Shared Services, and DNS Peering from Shared Services to the other VPCs to support domain resolution.
     - More info on Cloud DNS can be found [here](https://cloud.google.com/dns/docs/best-practices).
-10. **_Optional_** If you wish to test with an Active Directory Domain, you can set up a [Domain Controller](https://cloud.google.com/architecture/deploy-an-active-directory-forest-on-compute-engine#deploy_the_active_directory_forest) in the Production Project using the `app-prod` VPC
+7. **_Optional_** If you wish to test with an Active Directory Domain, you can set up a [Domain Controller](https://cloud.google.com/architecture/deploy-an-active-directory-forest-on-compute-engine#deploy_the_active_directory_forest) in the Production Project using the `app-prod` VPC
 
 # Building The Test Servers
 
