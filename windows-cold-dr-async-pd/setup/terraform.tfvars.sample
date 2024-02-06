@@ -53,12 +53,16 @@ app-dc-gce-display-name = ""
 
 app-prod-dc-disk-selflink = ""
 # Leave the variable value as blank if you are not using a Domain Controller
+# Run this gcloud command to get the self link
+# > gcloud compute disks describe <ENTER APP PROD DC GCE DISPLAY NAME> --zone=us-east4-c --project=$app_prod_project --format="value(selfLink)"
 
 app-dc-disk-type = ""
 # Leave the variable value as blank if you are not using a Domain Controller
+# Default is pd-balanced
 
 app-prod-dc-zone = ""
 # Leave the variable value as blank if you are not using a Domain Controller
+# Default is us-east4
 
 ####################
 ### DR Variables ###
@@ -70,3 +74,4 @@ app-dr-region = "REPLACE_WITH_DR_REGION"
 
 app-dr-dc-zone = ""
 # Leave the variable value as blank if you are not using a Domain Controller
+# Default is us-central1-a

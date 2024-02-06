@@ -53,6 +53,8 @@ app-dc-gce-display-name = ""
 
 app-prod-dc-disk-selflink = ""
 # Leave the variable value as blank if you are not using a Domain Controller
+# Run this gcloud command to get the self link
+# > gcloud compute disks describe <ENTER EAST 4 DC GCE DISPLAY NAME> --zone=us-east4-c --project=$app_prod_project --format="value(selfLink)"
 
 app-dc-disk-type = ""
 # Leave the variable value as blank if you are not using a Domain Controller

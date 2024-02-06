@@ -45,15 +45,18 @@ app-dc-gce-display-name = ""
 
 app-dc-disk-type = ""
 # Leave the variable value as blank if you are not using a Domain Controller
+# Default is pd-balanced
 
 app-dc-machine-type = ""
 # Leave the variable value as blank if you are not using a Domain Controller
+# Default is e2-medium
 
 app-dr-dc-ip = ""
 # Leave the variable value as blank if you are not using a Domain Controller
 
 app-dr-dc-zone = ""
 # Leave the variable value as blank if you are not using a Domain Controller
+# Default is us-central1-a
 
 #####################################
 ### Failback/Production Variables ###
@@ -62,3 +65,4 @@ app-prod-project = "REPLACE_WITH_SERVICE_PROJECT_FOR_PRODUCTION_PROJECT_ID"
 
 app-prod-dc-zone = ""
 # Leave the variable value as blank if you are not using a Domain Controller
+# Default is us-east4-a
