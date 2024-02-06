@@ -30,17 +30,17 @@ use-domain-controller = false
 # Default value is FALSE
 # Set value to TRUE if you plan to manually build a Domain Controller as part of the demo
 
-app-prod-project = "epic-testing-prod-east"
+app-prod-project = "REPLACE_WITH_SERVICE_PROJECT_FOR_PRODUCTION_PROJECT_ID"
 
-app-prod-ip-subnet-self-link = "projects/epic-testing-shared-svcs/regions/us-east4/subnetworks/prod-epic-app-us-east4"
+app-prod-ip-subnet-self-link = "REPLACE_WITH_IP_SUBNET_FOR_PROD_SELF_LINK"
 # Run this gcloud command to get the self link
 # > gcloud compute networks subnets describe prod-app-us-east4 --region=us-east4 --project=$shared_vpc_host_project --format="value(selfLink)"
 
-app-prod-service-account = "770779208912-compute@developer.gserviceaccount.com"
+app-prod-service-account = "REPLACE_WITH_COMPUTE_ENGINE_DEFAULT_SERVICE_ACCOUNT"
 # Run this gcloud command to get the Service Account
 # > gcloud iam service-accounts list --project=$app_prod_project
 
-app-prod-dc-zone = "us-east4-a"
+app-prod-dc-zone = "REPLACE_WITH_PRODUCTION_ZONE"
 # Default is us-east4-a
 
 app-dc-gce-display-name = ""
@@ -58,9 +58,9 @@ app-dc-machine-type = ""
 ####################
 ### DR Variables ###
 ####################
-app-dr-project = "epic-testing-dr-east"
+app-dr-project = "REPLACE_WITH_SERVICE_PROJECT_FOR_DR_PROJECT_ID"
 
-app-dr-region = "us-central1"
+app-dr-region = "REPLACE_WITH_DR_REGION"
 # Default is us-central1
 
 app-dr-dc-zone = ""

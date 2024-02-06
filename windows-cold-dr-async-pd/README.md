@@ -141,7 +141,7 @@ fetch gce_disk
 # DR Failover
 
 > [!IMPORTANT]
-> If you are not using a Domain Controller to test, please ensure that the `use-domain-controller` variable in `terraform.tfvars` is set to `false` AND comment out line `18` in `stage-failback-async-boot-disks.tf`
+> If you are not using a Domain Controller to test, please ensure that the `use-domain-controller` variable in `terraform.tfvars` is set to `false`
 
 1. Simulate a DR event (e.g. shut down the production VMs)
 
@@ -159,7 +159,7 @@ done
     - `terraform plan -out tf.out` (there should be 10 or 11 resources to destroy)
     - `terraform apply tf.out`  
 
-3. Sever the Peering from the `shared-svcs` VPC to the `prod-vpc` VPC and establish a VPC Peering from the `shared-svcs` VPC to the `dr-vpc` VPC
+3. Sever the Peering from the `shared-svcs` VPC to the `app-prod` VPC and establish a VPC Peering from the `shared-svcs` VPC to the `app-dr` VPC
 
 ```bash
 export shared_vpc_host_project="REPLACE_WITH_SHARED_VPC_HOST_PROJECT_PROJECT_ID"
@@ -173,12 +173,12 @@ gcloud compute networks peerings delete "shared-svcs-vpc-to-prod-vpc" \
 gcloud compute networks peerings create shared-svcs-vpc-to-dr-vpc \
 --project=$shared_vpc_host_project \
 --network=shared-svcs \
---peer-network=dr-vpc
+--peer-network=app-dr
 
 # Create VPC Peering between dr-vpc and shared-svcs
 gcloud compute networks peerings create dr-vpc-to-shared-svcs-vpc \
 --project=$shared_vpc_host_project \
---network=dr-vpc \
+--network=app-dr \
 --peer-network=shared-svcs
 
 # Run this command to verify that the new Peerings are showing as ACTIVE
@@ -237,15 +237,14 @@ fetch gce_disk
 
 10. Navigate to the **/failback** folder and update the `terraform.tfvars` file with the appropriate variables for your environment to prepare for production failback
 
-11. While in the **/failback** folder, run the terraform commands
+11. **_Optional_** While in the **/failback** folder, run the terraform commands to prepare for failback
     - `terraform init` 
     - `terraform plan -out tf.out` (there should be 10 or 11 resources to create)
-    - `terraform apply tf.out`
 
 # Production Failback
 
 > [!IMPORTANT]
-> If you are not using a Domain Controller to test, please ensure that the `use-domain-controller` variable in `terraform.tfvars` is set to `false` AND comment out line `18` in `dr-east-sec-boot-disks.tf`
+> If you are not using a Domain Controller to test, please ensure that the `use-domain-controller` variable in `terraform.tfvars` is set to `false`
 
 1. Shut down DR VMs
 
@@ -266,7 +265,7 @@ done
     - `terraform plan -out tf.out` (should see 11 resources to destroy)
     - `terraform apply tf.out`  
 
-5. In the console, sever VPC peering from `shared-svcs` to `dr-vpc`, and establish VPC peering from `shared-svcs` to `prod-vpc`
+5. In the console, sever VPC peering from `shared-svcs` to `app-dr`, and establish VPC peering from `shared-svcs` to `app-prod`
 
 ```bash
 export shared_vpc_host_project="REPLACE_WITH_SHARED_VPC_HOST_PROJECT_PROJECT_ID"
@@ -280,7 +279,7 @@ gcloud compute networks peerings delete "shared-svcs-vpc-to-dr-vpc" \
 gcloud compute networks peerings create shared-svcs-vpc-to-prod-vpc \
 --project=$shared_vpc_host_project \
 --network=shared-svcs \
---peer-network=dr-vpc
+--peer-network=app-prod
 
 # Run this command to verify that the new Peerings are showing as ACTIVE
 gcloud compute networks peerings list \
@@ -292,7 +291,7 @@ gcloud compute networks peerings list \
 6. Navigate to the **/failback** folder
 
 7. While in the **/failback** folder, run the terraform commands to recover your VMs in the original production region using the replicated disks from DR
-    - `terraform plan -out tf.out` (should see 11 resources to add)
+    - `terraform plan -out tf.out` (should see 10 or 11 resources to add)
     - `terraform apply tf.out`
 
 8. Validate all servers and applications are back online and connected to the domain
@@ -311,7 +310,7 @@ done
 10. Rename `restage-dr-async-boot-disks.tf.failback` to `restage-dr-async-boot-disks.tf` and `restage-dr-async-rep.tf.failback` to `restage-dr-async-rep.tf`
 
 11. While in the **/failback** folder, run the terraform commands to re-create new boot disks in the DR region, and the associated async replication pairs to prepare for the next DR event
-    - `terraform plan -out tf.out` (should see 22 resources to add)
+    - `terraform plan -out tf.out` (should see 20 or 22 resources to add)
     - `terraform apply tf.out`
 
 > [!NOTE]
