@@ -300,7 +300,7 @@ The upload script provides functions where logic can be placed to define the val
     - storage.objects.delete - to be able to delete (overwrite) objects on a google cloud storage bucket
     - storage.objects.get - to be able to read objects on a google cloud storage bucket
 
-1.  The powershell upload script runs in Powershell 5.1.X. or Powershell 7.X. You need the [GoogleCloud powershell module](https://cloud.google.com/tools/powershell/docs/quickstart) installed. Install [Pester](https://pester.dev/docs/quick-start) for unit tests.
+1.  The powershell upload script runs in Powershell 5.1.X. or Powershell 7.X. You need the [GoogleCloud powershell module v1.0.1.10](https://cloud.google.com/tools/powershell/docs/quickstart) installed. Install [Pester](https://pester.dev/docs/quick-start) for unit tests.
 
 1.  The powershell upload script creates and uses a file called log.json. This file is important for the correct execution of the script because it is used to store reference information. It uses the reference information to upload only files newly created after the last successfully uploaded files.
 
