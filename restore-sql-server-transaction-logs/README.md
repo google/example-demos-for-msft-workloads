@@ -186,6 +186,11 @@ or, your user must be member of the following predefined roles:
 
 Powershell is the language of choice for the upload script because many SQL Server Database Administrators (DBAs) leverage PowerShell as a valuable tool to streamline and automate their tasks and efficiently manage database environments. PowerShell runs on Windows, Linux, and macOS.
 
+The powershell upload script runs in Powershell 5.1.X. or Powershell 7.X 
+You need to install the [GoogleCloud powershell module](https://cloud.google.com/tools/powershell/docs/quickstart).
+
+To set up the automatic file upload script, you need to perform some operations in your cloud project. In the [Cloud shell](https://cloud.google.com/shell/docs/using-cloud-shell) execute the following commands:
+
 1. First, create a service account that has rights to upload to the bucket:
 
         gcloud iam service-accounts create tx-log-backup-writer \
@@ -201,9 +206,9 @@ Powershell is the language of choice for the upload script because many SQL Serv
         gcloud iam service-accounts keys create KEY_FILE \
         --iam-account=tx-log-backup-writer@${PROJECT_ID}.iam.gserviceaccount.com
 
-1. Create a folder on a machine with access to the backup files. Place the upload-script.ps1 from the repository in that folder. Copy the key file from the previous step.
+1. Create a folder on a machine with access to the backup files. Copy the contents of the scheduled-upload folder from the repository in the newly created location. Copy the key file from the previous step in the same folder as the upload-script.ps1 file.
 
-1. Open the script and edit the following constants:
+1. Open the upload-script.ps1 script and edit the following constants:
 
 Provide in the -Value parameter the full path to the folder where your backup files will be generated:
 
@@ -294,6 +299,10 @@ The upload script provides functions where logic can be placed to define the val
     - storage.objects.create - to be able to create objects a google cloud storage bucket
     - storage.objects.delete - to be able to delete (overwrite) objects on a google cloud storage bucket
     - storage.objects.get - to be able to read objects on a google cloud storage bucket
+
+1.  The powershell upload script runs in Powershell 5.1.X. or Powershell 7.X. You need the [GoogleCloud powershell module](https://cloud.google.com/tools/powershell/docs/quickstart) installed. Install [Pester](https://pester.dev/docs/quick-start) for unit tests.
+
+1.  The powershell upload script creates and uses a file called log.json. This file is important for the correct execution of the script because it is used to store reference information. It uses the reference information to upload only files newly created after the last successfully uploaded files.
 
 
 ## References

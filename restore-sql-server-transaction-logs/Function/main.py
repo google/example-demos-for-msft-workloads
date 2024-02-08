@@ -64,9 +64,7 @@ def extract_info_from_file_name(object_name: str) -> [str, str, str, str]:
     return csql_instance_name, database_name, backup_type, no_recovery
 
 
-def extract_info_from_file_metadata(bucket_name: str, blob_name: str) -> [str, str, str, str]:
-
-    storage_client = storage.Client()
+def extract_info_from_file_metadata(storage_client: storage.Client, bucket_name: str, blob_name: str) -> [str, str, str, str]:
     bucket = storage_client.bucket(bucket_name)
     blob_metadata=(bucket.get_blob(blob_name)).metadata
 
@@ -87,7 +85,7 @@ def extract_info_from_file_metadata(bucket_name: str, blob_name: str) -> [str, s
     csql_instance_name = blob_metadata["CloudSqlInstance"]
     database_name = blob_metadata["DatabaseName"]
     backup_type = blob_metadata["BackupType"].upper()
-    no_recovery = not(blob_metadata["Recovery"].lower() == "true")
+    no_recovery = str(not(blob_metadata["Recovery"].lower() == "true")).lower()
 
     return csql_instance_name, database_name, backup_type, no_recovery    
 
@@ -120,7 +118,7 @@ def delete_processed_blob(source_bucket: google.cloud.storage.bucket.Bucket,obje
     return
 
 
-def handle_error(error_response: dict, source_bucket: google.cloud.storage.bucket.Bucket, object_name: str, logger) -> [str, bool]:
+def handle_error(error_response: dict, source_bucket: google.cloud.storage.bucket.Bucket, object_name: str, logger) -> None:
     logger.info(f"Got an error in the operation response: {error_response}")
 
     #if the import fails with error Msg 4326 - too early to apply to the database
@@ -128,19 +126,18 @@ def handle_error(error_response: dict, source_bucket: google.cloud.storage.bucke
     if "Msg 4326" in str(error_response.get("errors")):
         delete_processed_blob(source_bucket, object_name, logger)
         logger.info(f"Got a too early to apply to the database. Finished processing object {object_name}")
-        return "Operation succeded.", True
+        return
 
     #if the import fails with error Msg 4305 - too recent to apply to the database
     #leave the object on the bucket showing that it was not processed.
-    elif "Msg 4326" in str(error_response.get("errors")):
-        return f"Operation failed. Got a too recent SQL error and did not process the object {object_name}", False
+    elif "Msg 4305" in str(error_response.get("errors")):
+        raise RuntimeError(f"Operation failed. Got a too recent SQL error and did not process the object {object_name}")
 
     #if the import fails for any other reason, display the inner error stack.
     else:
-        return f"Operation failed. Could not process the object {object_name}. Error: {error_response}.", False
+        raise RuntimeError(f"Operation failed. Could not process the object {object_name}. Error: {error_response}.")
 
-
-def copy_blob_to_processed_bucket(processed_bucket_name: str, storage_client, source_bucket: google.cloud.storage.bucket.Bucket, object_name: str, logger) -> None:
+def copy_blob_to_processed_bucket(processed_bucket_name: str, storage_client, source_bucket: google.cloud.storage.bucket.Bucket, object_name: str) -> None:
     
     if processed_bucket_name:
         try:
@@ -185,7 +182,8 @@ def fn_restore_log(cloud_event):
         csql_instance_name, database_name, backup_type, no_recovery = extract_info_from_file_name(object_name)
     else:
         logger.info(f"Using metadata")
-        csql_instance_name, database_name, backup_type, no_recovery = extract_info_from_file_metadata(source_bucket_name, object_name)    
+        storage_client = storage.Client()
+        csql_instance_name, database_name, backup_type, no_recovery = extract_info_from_file_metadata(storage_client, source_bucket_name, object_name)    
 
     creds, project_id = google.auth.default()
     auth_req = google.auth.transport.requests.Request()
@@ -223,14 +221,8 @@ def fn_restore_log(cloud_event):
                 operation_status_done = True
 
                 if resp.get("error") is not None:
-                    
-                    outcome_message, finished_state = handle_error(resp.get("error"), source_bucket, object_name, logger)                    
-                    
-                    if finished_state:
-                        return outcome_message, 200
-                    else:                        
-                        raise RuntimeError(outcome_message)                        
-
+                    handle_error(resp.get("error"), source_bucket, object_name, logger)
+                    return "Operation succeded.", 200
                 else:
 
                     #operation success
