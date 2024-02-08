@@ -146,10 +146,11 @@ Copy the value of the serviceAccountEmailAddress field. It should be something i
         --gen2 \
         --region=<YOUR_REGION> \
         --retry \
-        --runtime=<YOUR_RUNTIME> \
-        --source=<YOUR_SOURCE_LOCATION> \
-        --entry-point=<YOUR_CODE_ENTRYPOINT> \        
+        --runtime=python312 \
+        --source=. \
+        --entry-point=fn_restore_log \        
         --set-env-vars USE_FIXED_FILE_NAME_FORMAT=False,PROCESSED_BUCKET_NAME=,MAX_OPERATION_FETCH_TIME_SECONDS=30
+        --trigger-bucket=<BUCKET_NAME> \
         --service-account cloud-function-sql-restore-log@${PROJECT_ID}.iam.gserviceaccount.com
 
 1. To invoke an authenticated cloud function, the underlying principal must have the invoker IAM permission. Assign the Invoker role (roles/run.invoker) through Cloud Run for 2nd gen functions to the function’s service account:
