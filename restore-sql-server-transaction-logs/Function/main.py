@@ -40,14 +40,21 @@ def get_environment_variables(logger) -> [str, str, int]:
 
 def extract_info_from_file_name(object_name: str) -> [str, str, str, str]:
     
-    file_name=(object_name.split("/")[-1])
-    name_groups = file_name.split("_")
+    not_allowed_group_names=["full", "diff", "tlog", "recovery", "norecovery"]
 
-    if len(name_groups)<2:
+    file_name=(object_name.split("/")[-1])
+    last_point_index = file_name.rfind(".")
+    
+    if (last_point_index>-1):
+        file_name=file_name[0:last_point_index]
+
+    valid_name_groups = list(filter(lambda x: x.lower() not in not_allowed_group_names, file_name.lstrip("_").rstrip("_").split("_")))
+
+    if len(valid_name_groups)<2:
         raise RuntimeError("The file name does not respect the imposed format <cloudsql_instance_name>_<database_name>*.*")
 
-    csql_instance_name = name_groups[0]
-    database_name = name_groups[1]  
+    csql_instance_name = valid_name_groups[0]
+    database_name = valid_name_groups[1]  
 
     if ("_full") in file_name.lower():
         backup_type = "FULL" 
@@ -127,17 +134,21 @@ def handle_error(error_response: dict, source_bucket: google.cloud.storage.bucke
         delete_processed_blob(source_bucket, object_name, logger)
         logger.info(f"Got a too early to apply to the database. Finished processing object {object_name}")
         return
+    
+    if "already exists for FULL bak import" in str(error_response.get("errors")):
+        delete_processed_blob(source_bucket, object_name, logger)
+        logger.info(f"Got an already exists for FULL bak import error message. Finished processing object {object_name}")
+        return
 
     #if the import fails with error Msg 4305 - too recent to apply to the database
     #leave the object on the bucket showing that it was not processed.
-    elif "Msg 4305" in str(error_response.get("errors")):
+    if "Msg 4305" in str(error_response.get("errors")):
         raise RuntimeError(f"Operation failed. Got a too recent SQL error and did not process the object {object_name}")
 
-    #if the import fails for any other reason, display the inner error stack.
-    else:
-        raise RuntimeError(f"Operation failed. Could not process the object {object_name}. Error: {error_response}.")
+    #if the import fails for any other reason, display the inner error stack.    
+    raise RuntimeError(f"Operation failed. Could not process the object {object_name}. Error: {error_response}.")
 
-def copy_blob_to_processed_bucket(processed_bucket_name: str, storage_client, source_bucket: google.cloud.storage.bucket.Bucket, object_name: str) -> None:
+def copy_blob_to_processed_bucket(processed_bucket_name: str, storage_client, source_bucket: google.cloud.storage.bucket.Bucket, object_name: str, logger) -> None:
     
     if processed_bucket_name:
         try:
@@ -153,7 +164,8 @@ def copy_blob_to_processed_bucket(processed_bucket_name: str, storage_client, so
 
             if blob_copy is None:
                 raise RuntimeError(f"Copy operation for object {object_name} failed.")
-
+            logger.info(f"Copied object {object_name} from the source bucket to {processed_bucket_name}.")
+            
         except Exception as err:
             raise RuntimeError(f"Could not copy the object {object_name} to the processed bucket. Error: {err.args}")        
     return

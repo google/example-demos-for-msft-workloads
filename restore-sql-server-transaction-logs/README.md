@@ -54,6 +54,14 @@ This repository also contains a powershell script for regularly uploading new fi
 The function must have defined a set of environment variables. Details about them are described below, in the constraints section.
 
 
+## Prerequisites
+
+
+- [Cloud shell](https://cloud.google.com/shell/docs/using-cloud-shell). Alternatively, you can use [gcloud CLI](https://cloud.google.com/sdk/gcloud#download_and_install_the). The gcloud command-line tool is the powerful and unified command-line tool in Google Cloud. It comes preinstalled in Cloud Shell.
+- Powershell 5.1.X. or Powershell 7.X.
+- [GoogleCloud powershell module](https://cloud.google.com/tools/powershell/docs/quickstart).
+
+
 ## Setup and configuration - Cloud Function
 
 
@@ -93,6 +101,8 @@ or, your user must be member of the following predefined roles:
                 roles/iam.serviceAccountCreator
                 roles/resourcemanager.projectIamAdmin
                 roles/cloudfunctions.developer
+
+In the [Cloud shell](https://cloud.google.com/shell/docs/using-cloud-shell) execute the following commands:
 
 
 1. Create a GCS bucket to upload your transaction log backup files:
@@ -148,6 +158,7 @@ Copy the value of the serviceAccountEmailAddress field. It should be something i
         --retry \
         --runtime=python312 \
         --source=. \
+        --timeout=540 \
         --entry-point=fn_restore_log \        
         --set-env-vars USE_FIXED_FILE_NAME_FORMAT=False,PROCESSED_BUCKET_NAME=,MAX_OPERATION_FETCH_TIME_SECONDS=30
         --trigger-bucket=<BUCKET_NAME> \
@@ -199,8 +210,10 @@ To set up the automatic file upload script, you need to perform some operations 
         --display-name="tx-log-backup-writer"
 
 1. Grant rights on the service account to view, create and overwrite objects on the bucket:
+        
+        export PROJECT_ID=`gcloud config get-value project`
 
-        gsutil iam ch serviceAccount:tx-log-backup-writer@${PROJECT_ID}.iam.gserviceaccount.com:objectAdmin gs://<BUCKET_NAME>
+        gcloud storage buckets add-iam-policy-binding gs://<BUCKET_NAME> --member=serviceAccount:tx-log-backup-writer@${PROJECT_ID}.iam.gserviceaccount.com --role=roles/storage.objectAdmin
 
 1. Create a private key for your service account. You need to store the private key file locally to be authorized to upload files to the bucket.
 
@@ -240,6 +253,23 @@ The powershell script runs every 1 minute uploads only new backup files from you
 You can monitor the execution of the script and set up alerting based on execution count. For example, you can set up an alert if the function did not execute successfully in the last 5 minutes.
 
 For more information about service account keys, see [Create a service account key](https://cloud.google.com/iam/docs/keys-create-delete#creating) and [Best practices for managing service account keys](https://cloud.google.com/iam/docs/best-practices-for-managing-service-account-keys).
+
+
+
+## Unit tests - Cloud Function
+
+
+The Function folder contains a unit tests file called main_test.py. The unit tests are using the pytest framework. Install [Pytest](https://pypi.org/project/pytest/) by running `pip install pytest`. 
+
+To run the unit tests for the cloud function, run `pytest` in the Function folder.
+
+
+## Unit tests - Upload script
+
+
+The scheduled-upload folder contains a unit tests file called upload-script.Tests.ps1. Make sure that you have [Pester](https://pester..dev/docs/quick-start) installed. If not, you can install it by running run `Install-Module -Name Pester -Force -SkipPublisherCheck`
+
+To run the unit tests, either execute the script or run the `Invoke-Pester` command in the folder where the upload-script.Tests.ps1. file exists.
 
 
 
