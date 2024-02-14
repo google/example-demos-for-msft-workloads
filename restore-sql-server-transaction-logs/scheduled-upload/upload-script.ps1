@@ -13,6 +13,7 @@ New-Variable -Name GoogleAccountKeyFile -Value "" -Option Constant
 New-Variable -Name LogFile -Value "log.json" -Option Constant
 New-Variable -Name DateTimeFormat -Value "yyyy-MM-dd HH:mm:ss.fff" -Option Constant
 
+
 # Validations
 If (-Not (Test-Path $LocalPathForBackupFiles)) {
   throw "The provided value for LocalPathForBackupFiles $LocalPathForBackupFiles is not a valid path."

@@ -13,23 +13,24 @@ if (-not (Test-Path -Path $TestFilesPath -PathType Container)) {
 }
 
 # Helper function to create test files
-function Create-TestFile {
+function Invoke-FileCreation {
     param (
-        $fileName,
-        $content = ""
+        $FileName,
+        $Content = ""
     )
 
-    $filePath = Join-Path -Path $TestFilesPath -ChildPath $fileName
-    $content | Out-File -FilePath $filePath -Force
+    $filePath = Join-Path -Path $TestFilesPath -ChildPath $FileName
+    $Content | Out-File -FilePath $filePath -Force
 }
 
 # BeforeEach block to create test files
 BeforeAll {
+
     # Create test files
-    Create-TestFile -fileName "FullBackupFile.bak"
-    Create-TestFile -fileName "DiffBackupFile.bak"
-    Create-TestFile -fileName "BackupFile.bak"
-    Create-TestFile -fileName "OtherFile.txt"
+    Invoke-FileCreation -FileName "FullBackupFile.bak" -Content ""
+    Invoke-FileCreation -FileName "DiffBackupFile.bak" -Content ""
+    Invoke-FileCreation -FileName "BackupFile.bak" -Content ""
+    Invoke-FileCreation -FileName "OtherFile.txt" -Content ""
 }
 
 
@@ -73,15 +74,15 @@ Describe "Get-LogObject" {
     }
 }
 
-# Describe block for Set-LogData function
-Describe "Set-LogData" {
+# Describe block for Sync-LogData function
+Describe "Sync-LogData" {
     It "Creates a log object with correct properties" {
         $newMaxDateTimeUtc = Get-Date
         $uploadedObjectsNumber = 10
         $currentDateTimeUtc = Get-Date
         $DateTimeFormat = "yyyy-MM-dd HH:mm:ss"
         $LogFile = "TestLogFile.json"
-        Set-LogData -newMaxDateTimeUtc $newMaxDateTimeUtc -uploadedObjectsNumber $uploadedObjectsNumber -currentDateTimeUtc $currentDateTimeUtc -DateTimeFormat $DateTimeFormat -LogFile $LogFile
+        Sync-LogData -newMaxDateTimeUtc $newMaxDateTimeUtc -uploadedObjectsNumber $uploadedObjectsNumber -currentDateTimeUtc $currentDateTimeUtc -DateTimeFormat $DateTimeFormat -LogFile $LogFile
         $log = Get-Content $LogFile | ConvertFrom-Json
         $log.LastRunMaxWriteDateTimeUtc | Should -Be $newMaxDateTimeUtc.ToString($DateTimeFormat)
         $log.LastRunUploadedObjectsNumber | Should -Be $uploadedObjectsNumber
@@ -93,11 +94,11 @@ Describe "Set-LogData" {
 Describe "UploadToCloudBucket" {
     # You may need to mock some commands or use Pester's -MockWith parameter to test specific behaviors
     It "Does not throw an exception for valid inputs" {
-        
+
         # Mock the upload and auth commands
         Mock -CommandName 'Get-Auth' -MockWith { return } -ModuleName HelperFunctions
         Mock -CommandName 'UploadNewGCSObject' -MockWith {return } -ModuleName HelperFunctions
-        Mock -CommandName 'Set-LogData' -MockWith { return } -ModuleName HelperFunctions
+        Mock -CommandName 'Sync-LogData' -MockWith { return } -ModuleName HelperFunctions
 
         $LocalPathForBackupFiles = $TestFilesPath
         $GoogleAccountKeyFile = "NotExistingKeyFile.json"
