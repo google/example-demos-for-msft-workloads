@@ -7,6 +7,8 @@ using Google.Protobuf.WellKnownTypes;
 using Google.Cloud.PubSub.V1;
 using System.Text.Json;
 using Google.Api;
+using Parquet;
+using Parquet.Data;
 
 namespace AspNetCoreWebApi6
 {
@@ -44,9 +46,38 @@ namespace AspNetCoreWebApi6
             };
  
             publisher.Publish(topicName, new[] { message });
-            _logger.LogInformation("Published to PubSub Event having UUID {uuid}", xEvent.UUID.ToString());
         }
 
+        public static void AddEventToList(List<SqlAuditEvent> SQLAuditEventData, ILogger _logger, IXEvent xEvent)
+        {
+            SqlAuditEvent sqlAuditEvent = new SqlAuditEvent();
+            DateTime dateValue;
+
+            if (DateTime.TryParse(xEvent.Fields["event_time"].ToString(), out dateValue))
+                sqlAuditEvent.EventTime = dateValue;
+            else
+                sqlAuditEvent.EventTime = DateTime.MinValue;
+
+            sqlAuditEvent.ClassType = xEvent.Fields["class_type"].ToString();
+            sqlAuditEvent.ObjectName = xEvent.Fields["object_name"].ToString();
+            sqlAuditEvent.DatabaseName = xEvent.Fields["database_name"].ToString();
+            sqlAuditEvent.SessionId = Int32.Parse(xEvent.Fields["session_id"].ToString());
+            sqlAuditEvent.Statement = xEvent.Fields["statement"].ToString();
+            sqlAuditEvent.SequenceNumber = xEvent.Fields["sequence_number"].ToString();
+            sqlAuditEvent.ServerPrincipalName = xEvent.Fields["server_principal_name"].ToString();
+            sqlAuditEvent.TransactionId = Int64.Parse(xEvent.Fields["transaction_id"].ToString());
+            sqlAuditEvent.ObjectId = Int32.Parse(xEvent.Fields["object_id"].ToString());
+            sqlAuditEvent.DatabasePrincipalName = xEvent.Fields["database_principal_name"].ToString();
+            sqlAuditEvent.ServerInstanceName = xEvent.Fields["server_instance_name"].ToString();
+            sqlAuditEvent.ApplicationName = xEvent.Fields["application_name"].ToString();
+            sqlAuditEvent.DurationMilliseconds = Int64.Parse(xEvent.Fields["duration_milliseconds"].ToString());
+            sqlAuditEvent.SchemaName = xEvent.Fields["schema_name"].ToString();
+            sqlAuditEvent.Succeeded = Convert.ToBoolean(xEvent.Fields["succeeded"].ToString());
+            sqlAuditEvent.ActionId = xEvent.Fields["action_id"].ToString();
+            sqlAuditEvent.ConnectionId = xEvent.Fields["connection_id"].ToString();
+
+            SQLAuditEventData.Add(sqlAuditEvent);
+        }
 
         public static void ProcessXEventMessageToEntriesList(
             string projectId,
@@ -82,7 +113,7 @@ namespace AspNetCoreWebApi6
             {            
                 if (CheckFieldStatus(entry.Value, entry.Key, xEvent, cfg))
                     auditLog.Request.Fields.Add(entry.Value, Value.ForString(xEvent.Fields[entry.Key].ToString()));             
-            }        
+            }
 
             var payLoad = Any.Pack(auditLog);
             logEntry.ProtoPayload = payLoad;

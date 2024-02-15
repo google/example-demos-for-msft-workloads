@@ -4,6 +4,9 @@ using Google.Cloud.Logging.V2;
 using Google.Cloud.Storage.V1;
 using Newtonsoft.Json.Linq;
 using System.Text.Json;
+using Parquet;
+using Parquet.Data;
+using Parquet.Serialization;
 
 namespace AspNetCoreWebApi6.Controllers
 {
@@ -17,6 +20,7 @@ namespace AspNetCoreWebApi6.Controllers
         public readonly IConfiguration _configuration;
         private List<LogEntry> logEntries = new List<LogEntry>();
         private LoggingServiceV2Client loggingServiceV2Client = LoggingServiceV2Client.Create();
+        private List<SqlAuditEvent> SQLAuditEventData = new List<SqlAuditEvent>();
         IDictionary<string, string> fieldMapping = new Dictionary<string, string>();
         public AuditFileController(IConfiguration configuration, ILogger<AuditFileController> logger)
         {
@@ -54,13 +58,41 @@ namespace AspNetCoreWebApi6.Controllers
         {            
             string settingsFileName = (Environment.GetEnvironmentVariable("SETTINGS_FILENAME") ?? "mySettings.json");
             string topicId = Environment.GetEnvironmentVariable("TOPIC_ID") ?? "";
-            bool publishToPubSub = bool.Parse(Environment.GetEnvironmentVariable("DO_PUBSUB_PUBLISH") ?? "false");            
+            bool publishToPubSub = bool.Parse(Environment.GetEnvironmentVariable("DO_PUBSUB_PUBLISH") ?? "false");
+            bool saveParquetToGCS = bool.Parse(Environment.GetEnvironmentVariable("DO_PARQUET_GCS_SAVE") ?? "false");
+            string saveParquetBucketName = Environment.GetEnvironmentVariable("PARQUET_GCS_BUCKETNAME") ?? "";
+            bool saveToLog = bool.Parse(Environment.GetEnvironmentVariable("DO_LOG_SAVE") ?? "false");
             int batchSize = Int32.Parse(Environment.GetEnvironmentVariable("BATCH_SIZE") ?? "1000");
             string nowString = ((DateTimeOffset)DateTime.UtcNow).ToString("yyyyMMddHHmmssfff");            
             string uuidString = (Guid.NewGuid()).ToString();
-            
+
             var bucketName = body.GetProperty("bucket").GetString();
             var uploadedFileName = body.GetProperty("name").GetString();
+
+            //In case of using GCS Notifications
+            //var bucketName = body.GetProperty("message").GetProperty("attributes").GetProperty("bucketId").GetString();
+            //var uploadedFileName = body.GetProperty("message").GetProperty("attributes").GetProperty("objectId").GetString();
+
+            if (!(publishToPubSub) && !(saveParquetToGCS) && !(saveToLog)){
+                var errMessage = "400 Bad Request. DO_PUBSUB_PUBLISH, DO_PARQUET_GCS_SAVE and DO_LOG_SAVE cannot be false at the same time.";
+                var result = new BadRequestObjectResult(new { message = errMessage, currentDate = DateTime.Now });
+                _logger.LogInformation(errMessage);
+                return result;
+            }
+
+            if (saveToLog && string.IsNullOrWhiteSpace(logId)){
+                var errMessage = "400 Bad Request. LOG_ID must not be null.";
+                var result = new BadRequestObjectResult(new { message = errMessage, currentDate = DateTime.Now });
+                _logger.LogInformation(errMessage);
+                return result;
+            }
+
+            if (saveParquetToGCS && string.IsNullOrWhiteSpace(saveParquetBucketName)){
+                var errMessage = "400 Bad Request. PARQUET_GCS_BUCKETNAME must not be null.";
+                var result = new BadRequestObjectResult(new { message = errMessage, currentDate = DateTime.Now });
+                _logger.LogInformation(errMessage);
+                return result;
+            }
 
             if (string.IsNullOrWhiteSpace(uploadedFileName)) {
                 var errMessage = "400 Bad Request. The name element in the post request cannot be empty.";
@@ -81,7 +113,7 @@ namespace AspNetCoreWebApi6.Controllers
 
             using (var configFileLocalPath = System.IO.File.OpenWrite(localSettingsFile))
                 {
-                    storage.DownloadObject(bucketName, "config/"+settingsFileName, configFileLocalPath);                    
+                    storage.DownloadObject(bucketName, "config/"+settingsFileName, configFileLocalPath);
                     configFileLocalPath.Close();
                 }
 
@@ -95,9 +127,8 @@ namespace AspNetCoreWebApi6.Controllers
                 storage.DownloadObject(bucketName, uploadedFileName, auditLocalFilePath);
                 auditLocalFilePath.Close();
             }
-
+                        
             XEFileEventStreamer XEReadStream = new XEFileEventStreamer(localAuditFile);
-            
             await XEReadStream.ReadEventStream(
                 () => {
                     return Task.CompletedTask;                    
@@ -107,25 +138,50 @@ namespace AspNetCoreWebApi6.Controllers
                     if (publishToPubSub)
                         Utils.WriteMessageToPubSub(projectId, topicId, _logger, xEvent);
 
-                    Utils.ProcessXEventMessageToEntriesList(
-                        projectId,
-                        logId,
-                        fieldMapping,
-                        loggingServiceV2Client,
-                        uploadedFileName,
-                        xEvent,
-                        _configuration,
-                        logEntries);
+                    if (saveToLog) {
 
-                    if (logEntries.Count >= batchSize)
-                        Utils.WriteMessageToLog(projectId, logId, loggingServiceV2Client, uploadedFileName, _logger, logEntries);
+                        Utils.ProcessXEventMessageToEntriesList(
+                            projectId,
+                            logId,
+                            fieldMapping,
+                            loggingServiceV2Client,
+                            uploadedFileName,
+                            xEvent,
+                            _configuration,
+                            logEntries);
+
+                        if (logEntries.Count >= batchSize)
+                            Utils.WriteMessageToLog(projectId, logId, loggingServiceV2Client, uploadedFileName, _logger, logEntries);
+                    }
+
+                    if (saveParquetToGCS) {
+                       Utils.AddEventToList(SQLAuditEventData, _logger, xEvent);
+                    }
 
                     return Task.CompletedTask;
                 },
                 CancellationToken.None).ContinueWith(ct => {
-                    if (logEntries.Count>0)
+                    
+                    if (saveToLog && logEntries.Count>0)
                         Utils.WriteMessageToLog(projectId, logId, loggingServiceV2Client, uploadedFileName, _logger, logEntries);
                 });
+
+            if (saveParquetToGCS) {
+
+                string parquetObjectName = uploadedFileName.Replace(".sqlaudit",".parquet");
+                string localParquetFile = uuidString + "_data.parquet";
+
+                await ParquetSerializer.SerializeAsync(SQLAuditEventData, localParquetFile);
+                using var fileStream =  System.IO.File.OpenRead(localParquetFile);
+                storage.UploadObject(saveParquetBucketName, parquetObjectName, null, fileStream);
+                
+                _logger.LogInformation("Uploaded parquet file {fileName} with {count} entries to {bucket} ", parquetObjectName, SQLAuditEventData.Count, saveParquetBucketName);
+
+                System.IO.File.Delete(localParquetFile);
+                SQLAuditEventData.Clear();
+
+
+            }
             System.IO.File.Delete(localAuditFile);
             System.IO.File.Delete(localSettingsFile);
             return Ok();

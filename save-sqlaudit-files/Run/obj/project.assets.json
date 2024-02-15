@@ -1,0 +1,326 @@
+{
+  "version": 3,
+  "targets": {
+    "net6.0": {}
+  },
+  "libraries": {},
+  "projectFileDependencyGroups": {
+    "net6.0": [
+      "CloudNative.CloudEvents.NewtonsoftJson >= 2.1.0",
+      "Google.Apis >= 1.61.0",
+      "Google.Apis.Auth >= 1.61.0",
+      "Google.Apis.Auth.AspNetCore3 >= 1.61.0",
+      "Google.Apis.Drive.v3 >= 1.61.0.3082",
+      "Google.Cloud.Audit >= 2.1.0",
+      "Google.Cloud.Logging.V2 >= 4.0.0",
+      "Google.Cloud.PubSub.V1 >= 3.2.0",
+      "Google.Cloud.Storage.V1 >= 4.1.0",
+      "Google.Events.Protobuf >= 1.0.0",
+      "Microsoft.CSharp >= 4.7.0",
+      "Microsoft.SqlServer.XEvent.XELite >= 2021.12.12.2",
+      "Parquet.Net >= 4.23.4",
+      "Swashbuckle.AspNetCore >= 6.2.3"
+    ]
+  },
+  "packageFolders": {
+    "C:\\Users\\alexcarciu\\.nuget\\packages\\": {}
+  },
+  "project": {
+    "version": "1.0.0",
+    "restore": {
+      "projectUniqueName": "D:\\msft\\msft-on-gcp-code-samples\\save-sqlaudit-files\\Run\\AspNetCoreWebApi6.csproj",
+      "projectName": "AspNetCoreWebApi6",
+      "projectPath": "D:\\msft\\msft-on-gcp-code-samples\\save-sqlaudit-files\\Run\\AspNetCoreWebApi6.csproj",
+      "packagesPath": "C:\\Users\\alexcarciu\\.nuget\\packages\\",
+      "outputPath": "D:\\msft\\msft-on-gcp-code-samples\\save-sqlaudit-files\\Run\\obj\\",
+      "projectStyle": "PackageReference",
+      "configFilePaths": [
+        "C:\\Users\\alexcarciu\\AppData\\Roaming\\NuGet\\NuGet.Config"
+      ],
+      "originalTargetFrameworks": [
+        "net6.0"
+      ],
+      "frameworks": {
+        "net6.0": {
+          "targetAlias": "net6.0",
+          "projectReferences": {}
+        }
+      },
+      "warningProperties": {
+        "warnAsError": [
+          "NU1605"
+        ]
+      },
+      "restoreAuditProperties": {
+        "enableAudit": "true",
+        "auditLevel": "low",
+        "auditMode": "direct"
+      }
+    },
+    "frameworks": {
+      "net6.0": {
+        "targetAlias": "net6.0",
+        "dependencies": {
+          "CloudNative.CloudEvents.NewtonsoftJson": {
+            "target": "Package",
+            "version": "[2.1.0, )"
+          },
+          "Google.Apis": {
+            "target": "Package",
+            "version": "[1.61.0, )"
+          },
+          "Google.Apis.Auth": {
+            "target": "Package",
+            "version": "[1.61.0, )"
+          },
+          "Google.Apis.Auth.AspNetCore3": {
+            "target": "Package",
+            "version": "[1.61.0, )"
+          },
+          "Google.Apis.Drive.v3": {
+            "target": "Package",
+            "version": "[1.61.0.3082, )"
+          },
+          "Google.Cloud.Audit": {
+            "target": "Package",
+            "version": "[2.1.0, )"
+          },
+          "Google.Cloud.Logging.V2": {
+            "target": "Package",
+            "version": "[4.0.0, )"
+          },
+          "Google.Cloud.PubSub.V1": {
+            "target": "Package",
+            "version": "[3.2.0, )"
+          },
+          "Google.Cloud.Storage.V1": {
+            "target": "Package",
+            "version": "[4.1.0, )"
+          },
+          "Google.Events.Protobuf": {
+            "target": "Package",
+            "version": "[1.0.0, )"
+          },
+          "Microsoft.CSharp": {
+            "target": "Package",
+            "version": "[4.7.0, )"
+          },
+          "Microsoft.SqlServer.XEvent.XELite": {
+            "target": "Package",
+            "version": "[2021.12.12.2, )"
+          },
+          "Parquet.Net": {
+            "target": "Package",
+            "version": "[4.23.4, )"
+          },
+          "Swashbuckle.AspNetCore": {
+            "target": "Package",
+            "version": "[6.2.3, )"
+          }
+        },
+        "imports": [
+          "net461",
+          "net462",
+          "net47",
+          "net471",
+          "net472",
+          "net48",
+          "net481"
+        ],
+        "assetTargetFallback": true,
+        "warn": true,
+        "downloadDependencies": [
+          {
+            "name": "Microsoft.AspNetCore.App.Ref",
+            "version": "[6.0.27, 6.0.27]"
+          },
+          {
+            "name": "Microsoft.NETCore.App.Host.win-x64",
+            "version": "[6.0.27, 6.0.27]"
+          },
+          {
+            "name": "Microsoft.NETCore.App.Ref",
+            "version": "[6.0.27, 6.0.27]"
+          },
+          {
+            "name": "Microsoft.WindowsDesktop.App.Ref",
+            "version": "[6.0.27, 6.0.27]"
+          }
+        ],
+        "frameworkReferences": {
+          "Microsoft.AspNetCore.App": {
+            "privateAssets": "none"
+          },
+          "Microsoft.NETCore.App": {
+            "privateAssets": "all"
+          }
+        },
+        "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\8.0.200\\RuntimeIdentifierGraph.json"
+      }
+    }
+  },
+  "logs": [
+    {
+      "code": "NU1100",
+      "level": "Error",
+      "message": "Unable to resolve 'Microsoft.CSharp (>= 4.7.0)' for 'net6.0'.",
+      "libraryId": "Microsoft.CSharp",
+      "targetGraphs": [
+        "net6.0"
+      ]
+    },
+    {
+      "code": "NU1100",
+      "level": "Error",
+      "message": "Unable to resolve 'CloudNative.CloudEvents.NewtonsoftJson (>= 2.1.0)' for 'net6.0'.",
+      "libraryId": "CloudNative.CloudEvents.NewtonsoftJson",
+      "targetGraphs": [
+        "net6.0"
+      ]
+    },
+    {
+      "code": "NU1100",
+      "level": "Error",
+      "message": "Unable to resolve 'Swashbuckle.AspNetCore (>= 6.2.3)' for 'net6.0'.",
+      "libraryId": "Swashbuckle.AspNetCore",
+      "targetGraphs": [
+        "net6.0"
+      ]
+    },
+    {
+      "code": "NU1100",
+      "level": "Error",
+      "message": "Unable to resolve 'Google.Apis (>= 1.61.0)' for 'net6.0'.",
+      "libraryId": "Google.Apis",
+      "targetGraphs": [
+        "net6.0"
+      ]
+    },
+    {
+      "code": "NU1100",
+      "level": "Error",
+      "message": "Unable to resolve 'Google.Apis.Auth (>= 1.61.0)' for 'net6.0'.",
+      "libraryId": "Google.Apis.Auth",
+      "targetGraphs": [
+        "net6.0"
+      ]
+    },
+    {
+      "code": "NU1100",
+      "level": "Error",
+      "message": "Unable to resolve 'Google.Apis.Auth.AspNetCore3 (>= 1.61.0)' for 'net6.0'.",
+      "libraryId": "Google.Apis.Auth.AspNetCore3",
+      "targetGraphs": [
+        "net6.0"
+      ]
+    },
+    {
+      "code": "NU1100",
+      "level": "Error",
+      "message": "Unable to resolve 'Google.Apis.Drive.v3 (>= 1.61.0.3082)' for 'net6.0'.",
+      "libraryId": "Google.Apis.Drive.v3",
+      "targetGraphs": [
+        "net6.0"
+      ]
+    },
+    {
+      "code": "NU1100",
+      "level": "Error",
+      "message": "Unable to resolve 'Google.Events.Protobuf (>= 1.0.0)' for 'net6.0'.",
+      "libraryId": "Google.Events.Protobuf",
+      "targetGraphs": [
+        "net6.0"
+      ]
+    },
+    {
+      "code": "NU1100",
+      "level": "Error",
+      "message": "Unable to resolve 'Google.Cloud.Storage.V1 (>= 4.1.0)' for 'net6.0'.",
+      "libraryId": "Google.Cloud.Storage.V1",
+      "targetGraphs": [
+        "net6.0"
+      ]
+    },
+    {
+      "code": "NU1100",
+      "level": "Error",
+      "message": "Unable to resolve 'Google.Cloud.PubSub.V1 (>= 3.2.0)' for 'net6.0'.",
+      "libraryId": "Google.Cloud.PubSub.V1",
+      "targetGraphs": [
+        "net6.0"
+      ]
+    },
+    {
+      "code": "NU1100",
+      "level": "Error",
+      "message": "Unable to resolve 'Microsoft.SqlServer.XEvent.XELite (>= 2021.12.12.2)' for 'net6.0'.",
+      "libraryId": "Microsoft.SqlServer.XEvent.XELite",
+      "targetGraphs": [
+        "net6.0"
+      ]
+    },
+    {
+      "code": "NU1100",
+      "level": "Error",
+      "message": "Unable to resolve 'Google.Cloud.Logging.V2 (>= 4.0.0)' for 'net6.0'.",
+      "libraryId": "Google.Cloud.Logging.V2",
+      "targetGraphs": [
+        "net6.0"
+      ]
+    },
+    {
+      "code": "NU1100",
+      "level": "Error",
+      "message": "Unable to resolve 'Google.Cloud.Audit (>= 2.1.0)' for 'net6.0'.",
+      "libraryId": "Google.Cloud.Audit",
+      "targetGraphs": [
+        "net6.0"
+      ]
+    },
+    {
+      "code": "NU1100",
+      "level": "Error",
+      "message": "Unable to resolve 'Parquet.Net (>= 4.23.4)' for 'net6.0'.",
+      "libraryId": "Parquet.Net",
+      "targetGraphs": [
+        "net6.0"
+      ]
+    },
+    {
+      "code": "NU1100",
+      "level": "Error",
+      "message": "Unable to resolve 'Microsoft.NETCore.App.Ref (= 6.0.27)' for 'net6.0'.",
+      "libraryId": "Microsoft.NETCore.App.Ref",
+      "targetGraphs": [
+        "net6.0"
+      ]
+    },
+    {
+      "code": "NU1100",
+      "level": "Error",
+      "message": "Unable to resolve 'Microsoft.WindowsDesktop.App.Ref (= 6.0.27)' for 'net6.0'.",
+      "libraryId": "Microsoft.WindowsDesktop.App.Ref",
+      "targetGraphs": [
+        "net6.0"
+      ]
+    },
+    {
+      "code": "NU1100",
+      "level": "Error",
+      "message": "Unable to resolve 'Microsoft.AspNetCore.App.Ref (= 6.0.27)' for 'net6.0'.",
+      "libraryId": "Microsoft.AspNetCore.App.Ref",
+      "targetGraphs": [
+        "net6.0"
+      ]
+    },
+    {
+      "code": "NU1100",
+      "level": "Error",
+      "message": "Unable to resolve 'Microsoft.NETCore.App.Host.win-x64 (= 6.0.27)' for 'net6.0'.",
+      "libraryId": "Microsoft.NETCore.App.Host.win-x64",
+      "targetGraphs": [
+        "net6.0"
+      ]
+    }
+  ]
+}
