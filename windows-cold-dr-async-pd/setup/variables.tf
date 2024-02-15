@@ -14,72 +14,74 @@
  * limitations under the License.
  */
 
-variable "app-prod-east-tpl-self-link" {
+######################
+### Prod Variables ###
+######################
+
+variable "use-domain-controller" {
+  type = bool
+  description = "Set value to TRUE if you plan to manually build a Domain Controller as part of the demo. The default value will be set to FALSE"
+}
+
+variable "app-prod-project" {
+  type        = string
+  description = "The production project"
+}
+
+variable "app-prod-region" {
+  type        = string
+  description = "The production region"
+}
+
+variable "app-prod-tpl-self-link" {
   type        = string
   description = "The self link to the app server template"
 }
 
-variable "app-prod-east-service-account" {
+variable "app-prod-service-account" {
   type        = string
-  description = "The self link to the app server template"
+  description = "The email address of the production GCE service account"
 }
 
-variable "app-prod-east-service-account-scopes" {
+variable "app-prod-ip-subnet-self-link" {
   type        = string
-  description = "The self link to the app server template"
+  description = "The subnet to associate the production app servers with"
 }
 
-variable "app-prod-east-network-subnet" {
+variable "app-dc-gce-display-name" {
   type        = string
-  description = "The self link to the app server template"
+  description = "The production domain controller name in the GCE console"
 }
 
-variable "app-prod-east-ip-subnet" {
+variable "app-prod-dc-disk-selflink" {
   type        = string
-  description = "The subnet in East4 to associate the production app server IP address resources with"
+  description = "The production domain controller boot disk self link"
 }
 
-variable "app-prod-east-region" {
+variable "app-dc-disk-type" {
   type        = string
-  description = "The region to store the production app server IP address resources"
+  description = "The production domain controller boot disk type"
 }
 
-variable "app-dr-east-project" {
+variable "app-prod-dc-zone" {
   type        = string
-  description = "The DR project to contain the secondary boot disks"
+  description = "The production zone to contain the domain controller"
 }
 
-variable "app-prod-east-project" {
+####################
+### DR Variables ###
+####################
+variable "app-dr-project" {
   type        = string
-  description = "The project containing the app server primary boot disks"
+  description = "The DR project"
 }
 
 variable "app-dr-region" {
   type        = string
-  description = "The DR project to create the secondary boot disks in"
+  description = "The DR region"
 }
 
 variable "app-dr-dc-zone" {
   type        = string
-  description = "The zone to contain the domain controller secondary boot disk"
-}
-
-variable "app-dr-east-dc-gce-display-name" {
-  type        = string
-  description = "The DR east domain controller name in the GCE console"
-}
-
-variable "prod-east-domain-controller-disk-selflink" {
-  type        = string
-  description = "The prod east domain controller boot disk self link"
-}
-
-variable "app-dr-east-dc-pri-boot-disk-selflink" {
-  type        = string
-  description = "The east domain controller primary boot disk self link"
-}
-
-variable "app-east-dc-disk-type" {
-  type        = string
-  description = "The DR domain controller secondary boot disk type"
+  description = "The DR zone to contain the domain controller boot disk"
 }

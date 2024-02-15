@@ -14,38 +14,38 @@
  * limitations under the License.
  */
 
-data "terraform_remote_state" "east_app_server_ip" {
+data "terraform_remote_state" "app_server_ip" {
   backend = "local"
 
   config = {
-    path = "../prod/terraform.tfstate"
+    path = "../setup/terraform.tfstate"
   }
 }
 
 locals {
-  app_east_dr_vms = {
-    "dr-east-app-001" = { vm_order = 0, vm_size = "e2-medium", zone = "us-central1-a", dr_boot_disk_zone = "us-central1-a", dr_boot_disk = "east-app-001-secboot" },
-    "dr-east-app-002" = { vm_order = 1, vm_size = "e2-medium", zone = "us-central1-a", dr_boot_disk_zone = "us-central1-a", dr_boot_disk = "east-app-002-secboot" },
-    "dr-east-app-003" = { vm_order = 2, vm_size = "e2-medium", zone = "us-central1-a", dr_boot_disk_zone = "us-central1-a", dr_boot_disk = "east-app-003-secboot" },
-    "dr-east-app-004" = { vm_order = 3, vm_size = "e2-medium", zone = "us-central1-a", dr_boot_disk_zone = "us-central1-a", dr_boot_disk = "east-app-004-secboot" },
-    "dr-east-app-005" = { vm_order = 4, vm_size = "e2-medium", zone = "us-central1-a", dr_boot_disk_zone = "us-central1-a", dr_boot_disk = "east-app-005-secboot" },
-    "dr-east-app-006" = { vm_order = 5, vm_size = "e2-medium", zone = "us-central1-a", dr_boot_disk_zone = "us-central1-a", dr_boot_disk = "east-app-006-secboot" },
-    "dr-east-app-007" = { vm_order = 6, vm_size = "e2-medium", zone = "us-central1-a", dr_boot_disk_zone = "us-central1-a", dr_boot_disk = "east-app-007-secboot" },
-    "dr-east-app-008" = { vm_order = 7, vm_size = "e2-medium", zone = "us-central1-a", dr_boot_disk_zone = "us-central1-a", dr_boot_disk = "east-app-008-secboot" },
-    "dr-east-app-009" = { vm_order = 8, vm_size = "e2-medium", zone = "us-central1-a", dr_boot_disk_zone = "us-central1-a", dr_boot_disk = "east-app-009-secboot" },
-    "dr-east-app-010" = { vm_order = 9, vm_size = "e2-medium", zone = "us-central1-a", dr_boot_disk_zone = "us-central1-a", dr_boot_disk = "east-app-010-secboot" },
+  app_dr_vms = {
+    "dr-app-001" = { vm_order = 0, vm_size = "e2-medium", zone = "us-central1-a", dr_boot_disk_zone = "us-central1-a", dr_boot_disk = "app-001-secboot" },
+    "dr-app-002" = { vm_order = 1, vm_size = "e2-medium", zone = "us-central1-a", dr_boot_disk_zone = "us-central1-a", dr_boot_disk = "app-002-secboot" },
+    "dr-app-003" = { vm_order = 2, vm_size = "e2-medium", zone = "us-central1-a", dr_boot_disk_zone = "us-central1-a", dr_boot_disk = "app-003-secboot" },
+    "dr-app-004" = { vm_order = 3, vm_size = "e2-medium", zone = "us-central1-a", dr_boot_disk_zone = "us-central1-a", dr_boot_disk = "app-004-secboot" },
+    "dr-app-005" = { vm_order = 4, vm_size = "e2-medium", zone = "us-central1-a", dr_boot_disk_zone = "us-central1-a", dr_boot_disk = "app-005-secboot" },
+    "dr-app-006" = { vm_order = 5, vm_size = "e2-medium", zone = "us-central1-a", dr_boot_disk_zone = "us-central1-a", dr_boot_disk = "app-006-secboot" },
+    "dr-app-007" = { vm_order = 6, vm_size = "e2-medium", zone = "us-central1-a", dr_boot_disk_zone = "us-central1-a", dr_boot_disk = "app-007-secboot" },
+    "dr-app-008" = { vm_order = 7, vm_size = "e2-medium", zone = "us-central1-a", dr_boot_disk_zone = "us-central1-a", dr_boot_disk = "app-008-secboot" },
+    "dr-app-009" = { vm_order = 8, vm_size = "e2-medium", zone = "us-central1-a", dr_boot_disk_zone = "us-central1-a", dr_boot_disk = "app-009-secboot" },
+    "dr-app-010" = { vm_order = 9, vm_size = "e2-medium", zone = "us-central1-a", dr_boot_disk_zone = "us-central1-a", dr_boot_disk = "app-010-secboot" },
   }
 
-  sec_boot_disks_for_failback_east = {
-    "east-app-001-failback"={disk_type="pd-balanced",failback_zone="us-east4-a",dr_disk_zone="us-central1-a",dr_disk="east-app-001-secboot"},
-    "east-app-002-failback"={disk_type="pd-balanced",failback_zone="us-east4-a",dr_disk_zone="us-central1-a",dr_disk="east-app-002-secboot"},
-    "east-app-003-failback"={disk_type="pd-balanced",failback_zone="us-east4-a",dr_disk_zone="us-central1-a",dr_disk="east-app-003-secboot"},
-    "east-app-004-failback"={disk_type="pd-balanced",failback_zone="us-east4-a",dr_disk_zone="us-central1-a",dr_disk="east-app-004-secboot"},
-    "east-app-005-failback"={disk_type="pd-balanced",failback_zone="us-east4-a",dr_disk_zone="us-central1-a",dr_disk="east-app-005-secboot"},
-    "east-app-006-failback"={disk_type="pd-balanced",failback_zone="us-east4-a",dr_disk_zone="us-central1-a",dr_disk="east-app-006-secboot"},
-    "east-app-007-failback"={disk_type="pd-balanced",failback_zone="us-east4-a",dr_disk_zone="us-central1-a",dr_disk="east-app-007-secboot"},
-    "east-app-008-failback"={disk_type="pd-balanced",failback_zone="us-east4-a",dr_disk_zone="us-central1-a",dr_disk="east-app-008-secboot"},
-    "east-app-009-failback"={disk_type="pd-balanced",failback_zone="us-east4-a",dr_disk_zone="us-central1-a",dr_disk="east-app-009-secboot"},
-    "east-app-010-failback"={disk_type="pd-balanced",failback_zone="us-east4-a",dr_disk_zone="us-central1-a",dr_disk="east-app-010-secboot"},
+  sec_boot_disks_for_failback = {
+    "app-001-failback" = { disk_type = "pd-balanced", failback_zone = "us-east4-a", dr_disk_zone = "us-central1-a", dr_disk = "app-001-secboot" },
+    "app-002-failback" = { disk_type = "pd-balanced", failback_zone = "us-east4-a", dr_disk_zone = "us-central1-a", dr_disk = "app-002-secboot" },
+    "app-003-failback" = { disk_type = "pd-balanced", failback_zone = "us-east4-a", dr_disk_zone = "us-central1-a", dr_disk = "app-003-secboot" },
+    "app-004-failback" = { disk_type = "pd-balanced", failback_zone = "us-east4-a", dr_disk_zone = "us-central1-a", dr_disk = "app-004-secboot" },
+    "app-005-failback" = { disk_type = "pd-balanced", failback_zone = "us-east4-a", dr_disk_zone = "us-central1-a", dr_disk = "app-005-secboot" },
+    "app-006-failback" = { disk_type = "pd-balanced", failback_zone = "us-east4-a", dr_disk_zone = "us-central1-a", dr_disk = "app-006-secboot" },
+    "app-007-failback" = { disk_type = "pd-balanced", failback_zone = "us-east4-a", dr_disk_zone = "us-central1-a", dr_disk = "app-007-secboot" },
+    "app-008-failback" = { disk_type = "pd-balanced", failback_zone = "us-east4-a", dr_disk_zone = "us-central1-a", dr_disk = "app-008-secboot" },
+    "app-009-failback" = { disk_type = "pd-balanced", failback_zone = "us-east4-a", dr_disk_zone = "us-central1-a", dr_disk = "app-009-secboot" },
+    "app-010-failback" = { disk_type = "pd-balanced", failback_zone = "us-east4-a", dr_disk_zone = "us-central1-a", dr_disk = "app-010-secboot" },
   }
 }

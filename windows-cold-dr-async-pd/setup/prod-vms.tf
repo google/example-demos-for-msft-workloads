@@ -14,35 +14,40 @@
  * limitations under the License.
  */
 
-resource "google_compute_instance_from_template" "app_east_vms_from_tpl" {
-  for_each = local.app_east_vms
+resource "google_compute_instance_from_template" "app_vms_from_tpl" {
+  for_each = local.app_vms
   name     = each.key
   zone     = each.value.zone
-  project  = var.app-prod-east-project
+  project  = var.app-prod-project
 
-  source_instance_template = var.app-prod-east-tpl-self-link
+  source_instance_template = var.app-prod-tpl-self-link
 
   service_account {
-    email = var.app-prod-east-service-account
-    scopes = var.app-prod-east-service-account-scopes
+    email  = var.app-prod-service-account
+    scopes = ["cloud-platform"]
   }
 
   network_interface {
-    subnetwork = var.app-prod-east-ip-subnet
+    subnetwork = var.app-prod-ip-subnet-self-link
+  }
 
+  shielded_instance_config {
+    enable_secure_boot          = true
+    enable_vtpm                 = true
+    enable_integrity_monitoring = true
   }
 
   metadata = {
-    windows-startup-script-ps1 = templatefile("./templatefiles/secondary-dc.tpl") 
+    windows-startup-script-ps1 = templatefile("./templatefiles/ad-join.tpl",{})
   }
 }
 
-resource "google_compute_address" "app_east_server_ips" {
-  for_each     = local.app_east_vms
+resource "google_compute_address" "app_server_ips" {
+  for_each     = local.app_vms
   name         = "${each.key}-ip"
-  project      = var.app-prod-east-project
-  subnetwork   = var.app-prod-east-ip-subnet
+  project      = var.app-prod-project
+  subnetwork   = var.app-prod-ip-subnet-self-link
   address_type = "INTERNAL"
-  address      = google_compute_instance_from_template.app_east_vms_from_tpl[each.key].network_interface.0.network_ip
-  region       = var.app-prod-east-region
+  address      = google_compute_instance_from_template.app_vms_from_tpl[each.key].network_interface.0.network_ip
+  region       = var.app-prod-region
 }

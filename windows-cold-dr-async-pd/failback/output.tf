@@ -14,6 +14,6 @@
  * limitations under the License.
  */
 
-output "east_app_server_ip" {
-  value = values(google_compute_instance.failback-east-vms).*.network_interface.0.network_ip
+output "app_server_ip" {
+  value = values(google_compute_instance.failback-vms).*.network_interface.0.network_ip
 }
