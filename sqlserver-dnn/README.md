@@ -12,6 +12,7 @@
 * [Simulating common issues in the environment](#simulating-common-issues-in-the-enviornment)
     - [Graceful failover](#graceful-failover)
     - [Simulated Databaes VM failure](#simulated-database-vm-failure)
+* [Cleanup](#cleanup)
 
 ## Synopsis
 
@@ -243,3 +244,9 @@ To access the environment, follow these steps:
            `gcloud compute instances stop sql2 --zone=us-central1-f`
 
         * After the command completes successfully, the Availability Group should automatic recover back to **_sql1_**
+
+
+## Cleanup
+
+1. Run the terraform command to destroy the environment
+    - `terraform destroy`
