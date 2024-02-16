@@ -118,11 +118,13 @@ In the [Cloud shell](https://cloud.google.com/shell/docs/using-cloud-shell) exec
 
         gcloud sql instances describe <CLOUD_SQL_INSTANCE_NAME>
 
-Copy the value of the serviceAccountEmailAddress field. It should be something in the form of p******@${PROJECT_ID}.iam.gserviceaccount.com.
+Copy the entire value of the serviceAccountEmailAddress field. It should be something in the form of p******@******.iam.gserviceaccount.com.
 
-1. Grant objectViewer rights for the CloudSQL service account on the bucket you just created:
-
-        gsutil iam ch serviceAccount:<service-account-email-address>@gcp-sa-cloud-sql.iam.gserviceaccount.com:legacyBucketReader,objectViewer gs://<BUCKET_NAME>
+1. Grant objectViewer rights for the CloudSQL service account:
+       
+        gcloud projects add-iam-policy-binding ${PROJECT_ID} \
+        --member="serviceAccount:<service-account-email-address>" \
+        --role="roles/storage.legacyBucketReader"
 
 1. Create a service account for the cloud function:
 
