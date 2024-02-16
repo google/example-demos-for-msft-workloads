@@ -19,7 +19,8 @@
     <PackageReference Include="Google.Cloud.PubSub.V1" Version="3.2.0" />
     <PackageReference Include="Microsoft.SqlServer.XEvent.XELite" Version="2021.12.12.2" />
     <PackageReference Include="Google.Cloud.Logging.V2" Version="4.0.0" />
-    <PackageReference Include="Google.Cloud.Audit" Version="2.1.0" />    
+    <PackageReference Include="Google.Cloud.Audit" Version="2.1.0" />  
+    <PackageReference Include="Parquet.Net" Version="4.23.4" />  
   </ItemGroup>
 
 </Project>
