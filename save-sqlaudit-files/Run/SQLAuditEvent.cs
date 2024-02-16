@@ -2,14 +2,13 @@ using System;
 
 namespace AspNetCoreWebApi6
 {
-                        
     public class SqlAuditEvent
     {
         public string? ClassType { get; set; }
         public string? ObjectName { get; set; }
         public string? DatabaseName { get; set; }
         public int? SessionId { get; set; }
-        public string? Statement  { get; set; }
+        public string? Statement { get; set; }
         public string? SequenceNumber { get; set; }
         public string? ServerPrincipalName { get; set; }
         public Int64? TransactionId { get; set; }
@@ -22,7 +21,6 @@ namespace AspNetCoreWebApi6
         public string? SchemaName { get; set; }
         public bool? Succeeded { get; set; }
         public string? ActionId { get; set; }
-        public string? ConnectionId { get; set; }        
- 
+        public string? ConnectionId { get; set; }
     }
 }
