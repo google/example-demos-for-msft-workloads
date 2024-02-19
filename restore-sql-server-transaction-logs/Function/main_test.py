@@ -109,12 +109,14 @@ def test_handle_error(mock_source_bucket, mock_logger):
 
 
 def test_copy_blob_to_processed_bucket(mock_storage_client,
-                                       mock_source_bucket):
+                                       mock_source_bucket,
+                                       mock_logger):
     mock_processed_bucket = MagicMock()
     mock_storage_client.bucket.side_effect = [mock_source_bucket,
                                               mock_processed_bucket]
     copy_blob_to_processed_bucket('processed_bucket', mock_storage_client,
-                                  mock_source_bucket, 'object_name')
+                                  mock_source_bucket, 'object_name',
+                                  mock_logger)
     mock_source_bucket.blob.assert_called_with('object_name')
     mock_source_bucket.copy_blob.assert_called()
 
@@ -122,11 +124,11 @@ def test_copy_blob_to_processed_bucket(mock_storage_client,
     mock_source_bucket.copy_blob.side_effect = Exception('Copy failed')
     with pytest.raises(RuntimeError):
         copy_blob_to_processed_bucket('processed_bucket', mock_storage_client,
-                                      mock_source_bucket, 'object_name')
+                                      mock_source_bucket, 'object_name',
+                                      mock_logger)
 
 
 @patch('main.logging')
-@patch('main.error_reporting.Client')
 @patch('main.get_environment_variables')
 @patch('main.extract_info_from_file_metadata')
 @patch('main.get_import_context')
@@ -138,9 +140,8 @@ def test_copy_blob_to_processed_bucket(mock_storage_client,
 def test_fn_restore_log(
         mock_auth_default, mock_build, mock_sleep,
         mock_copy_blob, mock_delete_blob, mock_get_import_context,
-        mock_extract_info, mock_env_variables, mock_error_reporting,
-        mock_logging, mock_storage_client, mock_source_bucket,
-        mock_logger
+        mock_extract_info, mock_env_variables, mock_logging,
+        mock_storage_client, mock_source_bucket, mock_logger
 ):
     mock_auth = MagicMock()
     mock_auth_default.return_value = (mock_auth, 'project_id')
