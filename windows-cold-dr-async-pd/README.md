@@ -16,7 +16,7 @@ Locals are used in each folder for ease of manipulation.  These can be extracted
  - The Cloud Routers and Cloud NAT are there for outbound internet access and are optional components.
  - There are service projects for production, service projects for DR, and separate Shared VPCs to accomodate each environment ***using the same IP range***.  This solution requires an architecture similar to this (on premises components fully optional):
 
-![Windows Cold DR with PD Async Replication](./images/Windows%20Cold%20DR%20Architecture.png)
+![Windows Cold DR with PD Async Replication](./images/Windows%20Cold%20DR%20Architecture%20Diagram.png)
 
 ## Setup Folder
 Contains code to spin up 10 Windows Server servers and join them to a domain, create DR boot disks for all 10 and the domain controller (if using) in the DR region, and create the asynchronous replication pairs for all disks.  The code is written to preserve IP addresses.
