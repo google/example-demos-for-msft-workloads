@@ -22,7 +22,7 @@ Locals are used in each folder for ease of manipulation.  These can be extracted
 Contains code to spin up 10 Windows Server servers and join them to a domain, create DR boot disks for all 10 and the domain controller (if using) in the DR region, and create the asynchronous replication pairs for all disks.  The code is written to preserve IP addresses.
 
 ## DR Folder
-Contains code to spin up DR servers using the replicated disks and IP addresses from production (including the domain controller), create failback boot disks in the productino region, and create the failback async replication pairs for all disks.  The IP addresses are preserved for failback.
+Contains code to spin up DR servers using the replicated disks and IP addresses from production (including the domain controller), create failback boot disks in the production region, and create the failback async replication pairs for all disks.  The IP addresses are preserved for failback.
 
 ## Failback Folder
 Contains code to spin up failback/production servers using the replicated disks and IP addresses from DR, and includes code to recreate DR boot disks and async replication pairs to prepare for the next DR event.
