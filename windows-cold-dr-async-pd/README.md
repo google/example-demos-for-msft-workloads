@@ -96,6 +96,8 @@ gcloud compute networks peerings list \
     - More info on Cloud DNS can be found [here](https://cloud.google.com/dns/docs/best-practices).
 7. **_Optional_** If you wish to test with an Active Directory Domain, you can set up a [Domain Controller](https://cloud.google.com/architecture/deploy-an-active-directory-forest-on-compute-engine#deploy_the_active_directory_forest) in the Production Project using the `app-prod` VPC
 
+8. **_Optional_** If you wish to test with a SQL Server, you can set up a [SQL Server](https://cloud.google.com/compute/docs/instances/sql-server/creating-sql-server-instances#start_sql_instance) in the Production Project using the `app-prod` VPC, with a second data disk attached.
+
 # Building The Test Servers
 
 > [!IMPORTANT]
@@ -138,7 +140,7 @@ fetch gce_disk
        aggregate(value_time_since_last_replication_mean)]
 ```
 
-4. Optionally, navigate to the **/dr** folder and populate the terraform.tfvars values to prepare for a disaster scenario
+4. **_Optional_** Navigate to the **/dr** folder and populate the terraform.tfvars values to prepare for a disaster scenario
 
 # DR Failover
 
