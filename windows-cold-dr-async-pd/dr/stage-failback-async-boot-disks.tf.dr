@@ -87,3 +87,33 @@ resource "google_compute_disk" "failback-sec-boot-disk-for-dc" {
 
   physical_block_size_bytes = 4096
 }
+
+resource "google_compute_disk" "failback-sec-boot-disk-for-sql" {
+  depends_on = [google_compute_instance.dr-sql]
+  count = var.use-sql ? 1 : 0
+  name       = "${var.app-sql-gce-display-name}-failback"
+  type       = var.app-sql-disk-type
+  zone       = var.app-prod-sql-zone
+  project    = var.app-prod-project
+
+  async_primary_disk {
+    disk = "projects/${var.app-dr-project}/zones/${var.app-dr-sql-zone}/disks/${var.app-sql-gce-display-name}-secboot"
+  }
+
+  physical_block_size_bytes = 4096
+}
+
+resource "google_compute_disk" "failback-sec-data-disk-for-sql" {
+  depends_on = [google_compute_instance.dr-sql]
+  count = var.use-sql ? 1 : 0
+  name       = "${var.app-sql-data-disk-name}-failback"
+  type       = var.app-sql-disk-type
+  zone       = var.app-prod-sql-zone
+  project    = var.app-prod-project
+
+  async_primary_disk {
+    disk = "projects/${var.app-dr-project}/zones/${var.app-dr-sql-zone}/disks/${var.app-sql-data-disk-name}-secboot"
+  }
+
+  physical_block_size_bytes = 4096
+}

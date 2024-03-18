@@ -23,9 +23,19 @@ variable "use-domain-controller" {
   description = "Set value to TRUE if you plan to manually build a Domain Controller as part of the demo. The default value will be set to FALSE"
 }
 
+variable "use-sql" {
+  type = bool
+  description = "Set value to TRUE if you plan to manually build a SQL Server with two disks as part of the demo. The default value will be set to FALSE"
+}
+
 variable "app-dr-project" {
   type        = string
   description = "The DR project"
+}
+
+variable "app-dr-service-account" {
+  type        = string
+  description = "The DR GCE service account"
 }
 
 variable "app-dc-gce-display-name" {
@@ -53,14 +63,39 @@ variable "app-dr-dc-ip" {
   description = "The DR domain controller IP"
 }
 
-variable "app-dr-service-account" {
-  type        = string
-  description = "The DR GCE service account"
-}
-
 variable "app-dr-dc-zone" {
   type        = string
   description = "The DR zone to contain the domain controller"
+}
+
+variable "app-sql-gce-display-name" {
+  type        = string
+  description = "The SQL Server name in the GCE console"
+}
+
+variable "app-sql-disk-type" {
+  type        = string
+  description = "The DR SQL Server boot disk type"
+}
+
+variable "app-sql-machine-type" {
+  type        = string
+  description = "The DR SQL Server machine type"
+}
+
+variable "app-dr-sql-ip" {
+  type        = string
+  description = "The DR SQL Server IP"
+}
+
+variable "app-dr-sql-zone" {
+  type        = string
+  description = "The DR zone to contain the SQL Server"
+}
+
+variable "app-sql-data-disk-name" {
+  type = string
+  description = "The failback/production SQL Server data disk name"
 }
 
 #####################################
@@ -74,4 +109,9 @@ variable "app-prod-project" {
 variable "app-prod-dc-zone" {
   type        = string
   description = "The failback/production zone to contain the domain controller"
+}
+
+variable "app-prod-sql-zone" {
+  type        = string
+  description = "The failback/production zone to contain the SQL Server"
 }

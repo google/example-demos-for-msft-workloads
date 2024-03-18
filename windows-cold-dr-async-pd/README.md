@@ -138,6 +138,8 @@ fetch gce_disk
        aggregate(value_time_since_last_replication_mean)]
 ```
 
+4. Optionally, navigate to the **/dr** folder and populate the terraform.tfvars values to prepare for a disaster scenario
+
 # DR Failover
 
 > [!IMPORTANT]
@@ -188,7 +190,7 @@ gcloud compute networks peerings list \
 --format="table(peerings.name,peerings.state)"
 ```
 
-4. Navigate to the **/dr** folder and update the `terraform.tfvars` file with the appropriate variables for your environment
+4. Navigate to the **/dr** folder and update the `terraform.tfvars` file with the appropriate variables for your environment if not already populated
 
 5. While in the **/dr** folder, run the terraform commands to create the DR VMs using the replicated disks from Production
     - `terraform init` 

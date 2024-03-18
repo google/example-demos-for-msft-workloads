@@ -80,3 +80,39 @@ resource "google_compute_instance" "dr-dc" {
   allow_stopping_for_update = true
 
 }
+
+resource "google_compute_instance" "dr-sql" {
+  count = var.use-sql ? 1 : 0
+  depends_on   = [google_compute_instance.dr-dc]
+  name         = var.app-sql-gce-display-name
+  machine_type = var.app-sql-machine-type
+  zone         = var.app-dr-sql-zone
+  project      = var.app-dr-project
+
+  boot_disk {
+    source = "projects/${var.app-dr-project}/zones/${var.app-dr-sql-zone}/disks/${var.app-sql-gce-display-name}-secboot"
+  }
+
+  attached_disk {
+    source = "projects/${var.app-dr-project}/zones/${var.app-dr-sql-zone}/disks/${var.app-sql-data-disk-name}-secboot"
+  }
+
+  network_interface {
+    subnetwork = var.app-dr-ip-subnet-self-link
+    network_ip = var.app-dr-sql-ip
+  }
+
+  shielded_instance_config {
+    enable_secure_boot          = true
+    enable_vtpm                 = true
+    enable_integrity_monitoring = true
+  }
+
+  service_account {
+    email  = var.app-dr-service-account
+    scopes = ["cloud-platform"]
+  }
+
+  allow_stopping_for_update = true
+
+}
