@@ -101,7 +101,7 @@ gcloud compute networks peerings list \
 # Building The Test Servers
 
 > [!IMPORTANT]
-> If you are not using a Domain Controller to test, please ensure that the `use-domain-controller` variable in `terraform.tfvars` is set to `false`
+> If you are not using a Domain Controller or a SQL Server to test, please ensure that the `use-domain-controller` and `use-sql` variables in `terraform.tfvars` are set to `false`
 
 1. [Create an Instance template](https://cloud.google.com/compute/docs/instance-templates/create-instance-templates) in the Service Project for Production
     - A sample `gcloud` command has been provided in the **/setup/templatefiles** folder for your convenience
@@ -145,8 +145,7 @@ fetch gce_disk
 # DR Failover
 
 > [!IMPORTANT]
-> If you are not using a Domain Controller to test, please ensure that the `use-domain-controller` variable in `terraform.tfvars` is set to `false`
-> If you are not using a SQL Server to test, please ensure that the `use-sql` variable in `terraform.tfvars` is set to `false`
+> If you are not using a Domain Controller or a SQL Server to test, please ensure that the `use-domain-controller` and `use-sql` variables in `terraform.tfvars` are set to `false`
 
 1. Simulate a DR event (e.g. shut down the production VMs)
 
@@ -249,8 +248,7 @@ fetch gce_disk
 # Production Failback
 
 > [!IMPORTANT]
-> If you are not using a Domain Controller to test, please ensure that the `use-domain-controller` variable in `terraform.tfvars` is set to `false`
-> If you are not using a SQL Server to test, please ensure that the `use-sql` variable in `terraform.tfvars` is set to `false`
+> If you are not using a Domain Controller or a SQL Server to test, please ensure that the `use-domain-controller` and `use-sql` variables in `terraform.tfvars` are set to `false`
 
 1. Shut down DR VMs
 
