@@ -66,7 +66,7 @@ app-dc-disk-type = ""
 
 app-prod-dc-zone = ""
 # Leave the variable value as blank if you are not using a Domain Controller
-# Default is us-east4
+# Default is us-east4-a
 
 app-sql-gce-display-name = ""
 # Leave the variable value as blank if you are not using a SQL Server

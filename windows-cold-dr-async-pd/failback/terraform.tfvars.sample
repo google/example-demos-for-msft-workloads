@@ -30,7 +30,7 @@ use-domain-controller = false
 # Default value is FALSE
 # Set value to TRUE if you plan to manually build a Domain Controller as part of the demo
 
-use-sql = true
+use-sql = false
 # Default value is FALSE
 # Set value to TRUE if you plan to manually build a SQL Server with two disks as part of the demo
 
@@ -59,7 +59,6 @@ app-dc-disk-type = ""
 
 app-dc-machine-type = ""
 # Leave the variable value as blank if you are not using a Domain Controller
-# Default is e2-medium
 
 app-prod-sql-zone = ""
 # Default is us-east4-a
