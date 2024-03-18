@@ -146,6 +146,7 @@ fetch gce_disk
 
 > [!IMPORTANT]
 > If you are not using a Domain Controller to test, please ensure that the `use-domain-controller` variable in `terraform.tfvars` is set to `false`
+> If you are not using a SQL Server to test, please ensure that the `use-sql` variable in `terraform.tfvars` is set to `false`
 
 1. Simulate a DR event (e.g. shut down the production VMs)
 
@@ -249,6 +250,7 @@ fetch gce_disk
 
 > [!IMPORTANT]
 > If you are not using a Domain Controller to test, please ensure that the `use-domain-controller` variable in `terraform.tfvars` is set to `false`
+> If you are not using a SQL Server to test, please ensure that the `use-sql` variable in `terraform.tfvars` is set to `false`
 
 1. Shut down DR VMs
 
