@@ -89,8 +89,8 @@ resource "google_compute_disk" "failback-sec-boot-disk-for-dc" {
 }
 
 resource "google_compute_disk" "failback-sec-boot-disk-for-sql" {
-  depends_on = [google_compute_instance.dr-sql]
   count = var.use-sql ? 1 : 0
+  depends_on = [google_compute_instance.dr-sql]
   name       = "${var.app-sql-gce-display-name}-failback"
   type       = var.app-sql-disk-type
   zone       = var.app-prod-sql-zone
@@ -104,8 +104,8 @@ resource "google_compute_disk" "failback-sec-boot-disk-for-sql" {
 }
 
 resource "google_compute_disk" "failback-sec-data-disk-for-sql" {
+  count = var.use-sql ? 1 : 0  
   depends_on = [google_compute_instance.dr-sql]
-  count = var.use-sql ? 1 : 0
   name       = "${var.app-sql-data-disk-name}-failback"
   type       = var.app-sql-disk-type
   zone       = var.app-prod-sql-zone

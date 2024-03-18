@@ -84,6 +84,9 @@ app-prod-sql-zone = ""
 # Leave the variable value as blank if you are not using a SQL Server
 # Default is us-east4-a
 
+app-sql-data-disk-name = ""
+# Leave the variable value as blank if you are not using a SQL Server
+
 ####################
 ### DR Variables ###
 ####################

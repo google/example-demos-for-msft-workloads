@@ -125,13 +125,13 @@ resource "google_compute_disk" "dr-sec-boot-disk-for-sql" {
 
 resource "google_compute_disk" "dr-sec-data-disk-for-sql" {
   count = var.use-sql-server ? 1 : 0
-  name    = "${var.app-dc-gce-display-name}-secboot"
+  name    = "${var.app-sql-data-disk-name}-secboot"
   type    = var.app-dc-disk-type
   zone    = var.app-dr-dc-zone
   project = var.app-dr-project
 
   async_primary_disk {
-    disk = "projects/${var.app-prod-project}/zones/${var.app-prod-sql-zone}/disks/${var.app-sql-gce-display-name}"
+    disk = "projects/${var.app-prod-project}/zones/${var.app-prod-sql-zone}/disks/${var.app-sql-data-disk-name}"
   }
 
   physical_block_size_bytes = 4096

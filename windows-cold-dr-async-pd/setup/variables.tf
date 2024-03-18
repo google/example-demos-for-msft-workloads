@@ -93,6 +93,11 @@ variable "app-prod-sql-zone" {
   description = "The production zone for the SQL Server"
 }
 
+variable "app-sql-data-disk-name" {
+  type = string
+  description = "The failback/production SQL Server data disk name"
+}
+
 ####################
 ### DR Variables ###
 ####################
