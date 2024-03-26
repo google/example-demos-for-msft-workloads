@@ -98,6 +98,14 @@ gcloud compute networks peerings list \
 
 8. **_Optional_** If you wish to test with a SQL Server, you can set up a [SQL Server](https://cloud.google.com/compute/docs/instances/sql-server/creating-sql-server-instances#start_sql_instance) in the Production Project using the `app-prod` VPC, with a second data disk attached.
 
+9. **_Optional_** If using a SQL Server, you will need to create a Consistency Group for the boot and data disks, then add the disks to it:
+
+`gcloud compute resource-policies create disk-consistency-group sql-cgroup --region=us-east4 --project=<REPLACE WITH PROD/FAILBACK PROJECT ID>`
+`gcloud compute disks add-resource-policies <REPLACE WITH SQL BOOT DISK NAME> --zone=us-east4-a --resource-policies=sql-cgroup --project=<REPLACE WITH PROD/FAILBACK PROJECT ID>`
+`gcloud compute disks add-resource-policies <REPLACE WITH SQL DATA DISK NAME> --zone=us-east4-a --resource-policies=sql-cgroup --project=<REPLACE WITH PROD/FAILBACK PROJECT ID>`
+
+This is a critical step.  Once Async Replication has been enabled for a disk, you cannot add it to a consistency group.
+
 # Building The Test Servers
 
 > [!IMPORTANT]
@@ -212,9 +220,15 @@ do
 done
 ```
 
-8. Rename `stage-failback-async-boot-disks.tf.dr` to `stage-failback-async-boot-disks.tf` and `stage-failback-async-rep.tf.dr` to `stage-failback-async-rep.tf`
+8. Create a Consistency Group and add the DR disks to it:
 
-9. While in the **/dr** folder, run the terraform commands to create new boot disks in the Production region for failback, and the associated async replication pairs from DR
+`gcloud compute resource-policies create disk-consistency-group sql-cgroup --region=us-central1 --project=<REPLACE WITH DR PROJECT ID>`
+`gcloud compute disks add-resource-policies <REPLACE WITH SQL BOOT DISK NAME> --zone=us-central1-a --resource-policies=sql-cgroup --project=<REPLACE WITH DR PROJECT ID>`
+`gcloud compute disks add-resource-policies <REPLACE WITH SQL DATA DISK NAME> --zone=us-central1-a --resource-policies=sql-cgroup --project=<REPLACE WITH DR PROJECT ID>`
+
+9. Rename `stage-failback-async-boot-disks.tf.dr` to `stage-failback-async-boot-disks.tf` and `stage-failback-async-rep.tf.dr` to `stage-failback-async-rep.tf`
+
+10. While in the **/dr** folder, run the terraform commands to create new boot disks in the Production region for failback, and the associated async replication pairs from DR
     - `terraform plan -out tf.out` (should see 22 resources to add)
     - `terraform apply tf.out`  
 
@@ -239,9 +253,9 @@ fetch gce_disk
        aggregate(value_time_since_last_replication_mean)]
 ```
 
-10. Navigate to the **/failback** folder and update the `terraform.tfvars` file with the appropriate variables for your environment to prepare for production failback
+11. Navigate to the **/failback** folder and update the `terraform.tfvars` file with the appropriate variables for your environment to prepare for production failback
 
-11. **_Optional_** While in the **/failback** folder, run the terraform commands to prepare for failback
+12. **_Optional_** While in the **/failback** folder, run the terraform commands to prepare for failback
     - `terraform init` 
     - `terraform plan -out tf.out` (there should be 10 or 11 resources to create)
 
@@ -311,9 +325,14 @@ do
 done
 ```
 
-10. Rename `restage-dr-async-boot-disks.tf.failback` to `restage-dr-async-boot-disks.tf` and `restage-dr-async-rep.tf.failback` to `restage-dr-async-rep.tf`
+10. Add the new production / failback disks to the Consistency Group:
 
-11. While in the **/failback** folder, run the terraform commands to re-create new boot disks in the DR region, and the associated async replication pairs to prepare for the next DR event
+`gcloud compute disks add-resource-policies <REPLACE WITH SQL BOOT DISK NAME> --zone=us-east4-a --resource-policies=sql-cgroup --project=<REPLACE WITH PROD/FAILBACK PROJECT ID>`
+`gcloud compute disks add-resource-policies <REPLACE WITH SQL DATA DISK NAME> --zone=us-east4-a --resource-policies=sql-cgroup --project=<REPLACE WITH PROD/FAILBACK PROJECT ID>`
+
+11. Rename `restage-dr-async-boot-disks.tf.failback` to `restage-dr-async-boot-disks.tf` and `restage-dr-async-rep.tf.failback` to `restage-dr-async-rep.tf`
+
+12. While in the **/failback** folder, run the terraform commands to re-create new boot disks in the DR region, and the associated async replication pairs to prepare for the next DR event
     - `terraform plan -out tf.out` (should see 20 or 22 resources to add)
     - `terraform apply tf.out`
 

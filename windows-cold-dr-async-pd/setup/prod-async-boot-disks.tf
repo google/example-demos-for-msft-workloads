@@ -88,7 +88,7 @@ resource "google_compute_disk" "dr-sec-boot-disk-for-dc" {
 }
 
 resource "google_compute_disk" "dr-sec-boot-disk-for-sql" {
-  count = var.use-sql-server ? 1 : 0
+  count = var.use-sql ? 1 : 0
   name    = "${var.app-dc-gce-display-name}-secboot"
   type    = var.app-dc-disk-type
   zone    = var.app-dr-dc-zone
@@ -124,7 +124,7 @@ resource "google_compute_disk" "dr-sec-boot-disk-for-sql" {
 }
 
 resource "google_compute_disk" "dr-sec-data-disk-for-sql" {
-  count = var.use-sql-server ? 1 : 0
+  count = var.use-sql ? 1 : 0
   name    = "${var.app-sql-data-disk-name}-secboot"
   type    = var.app-dc-disk-type
   zone    = var.app-dr-dc-zone

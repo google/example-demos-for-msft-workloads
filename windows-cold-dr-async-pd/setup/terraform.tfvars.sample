@@ -31,7 +31,7 @@ use-domain-controller = false
 # Default value is FALSE
 # Set value to TRUE if you plan to manually build a Domain Controller as part of the demo
 
-use-sql-server = false
+use-sql = false
 # Default value is FALSE
 # Set value to TRUE if you plan to manually build a SQL Server as part of the demo
 
