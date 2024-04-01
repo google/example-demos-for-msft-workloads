@@ -100,9 +100,9 @@ gcloud compute networks peerings list \
 
 9. **_Optional_** If using a SQL Server, you will need to create a Consistency Group for the boot and data disks, then add the disks to it:
 
-`gcloud compute resource-policies create disk-consistency-group sql-cgroup --region=us-east4 --project=<REPLACE WITH PROD/FAILBACK PROJECT ID>`
-`gcloud compute disks add-resource-policies <REPLACE WITH SQL BOOT DISK NAME> --zone=us-east4-a --resource-policies=sql-cgroup --project=<REPLACE WITH PROD/FAILBACK PROJECT ID>`
-`gcloud compute disks add-resource-policies <REPLACE WITH SQL DATA DISK NAME> --zone=us-east4-a --resource-policies=sql-cgroup --project=<REPLACE WITH PROD/FAILBACK PROJECT ID>`
+    - `gcloud compute resource-policies create disk-consistency-group sql-cgroup --region=us-east4 --project=<REPLACE WITH PROD/FAILBACK PROJECT ID>`
+    - `gcloud compute disks add-resource-policies <REPLACE WITH SQL BOOT DISK NAME> --zone=us-east4-a --resource-policies=sql-cgroup --project=<REPLACE WITH PROD/FAILBACK PROJECT ID>`
+    - `gcloud compute disks add-resource-policies <REPLACE WITH SQL DATA DISK NAME> --zone=us-east4-a --resource-policies=sql-cgroup --project=<REPLACE WITH PROD/FAILBACK PROJECT ID>`
 
 This is a critical step.  Once Async Replication has been enabled for a disk, you cannot add it to a consistency group.
 
@@ -114,7 +114,7 @@ This is a critical step.  Once Async Replication has been enabled for a disk, yo
 1. [Create an Instance template](https://cloud.google.com/compute/docs/instance-templates/create-instance-templates) in the Service Project for Production
     - A sample `gcloud` command has been provided in the **/setup/templatefiles** folder for your convenience
 
-2. Navigate to the **/setup** folder and update the `terraform.tfvars` file with the appropriate variables for your environment
+2. Navigate to the **/setup** folder and rename `terraform.tfvars.sample` to `terraform.tfvars`. Update the file with the appropriate variables for your environment
     - If you are using a Domain Controller, navigate to the **/setup/templatefiles** folder and update `ad-join.tpl` with your values. 
 
 3. While in the **/setup** directory run the terraform commands

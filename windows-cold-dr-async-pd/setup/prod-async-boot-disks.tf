@@ -89,9 +89,9 @@ resource "google_compute_disk" "dr-sec-boot-disk-for-dc" {
 
 resource "google_compute_disk" "dr-sec-boot-disk-for-sql" {
   count = var.use-sql ? 1 : 0
-  name    = "${var.app-dc-gce-display-name}-secboot"
-  type    = var.app-dc-disk-type
-  zone    = var.app-dr-dc-zone
+  name    = "${var.app-sql-gce-display-name}-secboot"
+  type    = var.app-sql-disk-type
+  zone    = var.app-dr-sql-zone
   project = var.app-dr-project
 
   guest_os_features {
@@ -126,8 +126,8 @@ resource "google_compute_disk" "dr-sec-boot-disk-for-sql" {
 resource "google_compute_disk" "dr-sec-data-disk-for-sql" {
   count = var.use-sql ? 1 : 0
   name    = "${var.app-sql-data-disk-name}-secboot"
-  type    = var.app-dc-disk-type
-  zone    = var.app-dr-dc-zone
+  type    = var.app-sql-disk-type
+  zone    = var.app-dr-sql-zone
   project = var.app-dr-project
 
   async_primary_disk {

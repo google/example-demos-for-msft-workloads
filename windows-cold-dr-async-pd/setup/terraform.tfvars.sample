@@ -66,7 +66,7 @@ app-dc-disk-type = ""
 
 app-prod-dc-zone = ""
 # Leave the variable value as blank if you are not using a Domain Controller
-# Default is us-east4-a
+# Default is us-east4-c
 
 app-sql-gce-display-name = ""
 # Leave the variable value as blank if you are not using a SQL Server
@@ -74,7 +74,7 @@ app-sql-gce-display-name = ""
 app-prod-sql-disk-selflink = ""
 # Leave the variable value as blank if you are not using a SQL Server
 # Run this gcloud command to get the self link
-# > gcloud compute disks describe <ENTER APP-SQL-GCE-DISPLAY-NAME> --region=us-east4 --project=$shared_vpc_host_project --format="value(selfLink)"
+# > gcloud compute disks describe <ENTER APP-SQL-GCE-DISPLAY-NAME> --zone=us-east4-c --project=$app_prod_project --format="value(selfLink)"
 
 app-sql-disk-type = ""
 # Leave the variable value as blank if you are not using a SQL Server
@@ -82,7 +82,7 @@ app-sql-disk-type = ""
 
 app-prod-sql-zone = ""
 # Leave the variable value as blank if you are not using a SQL Server
-# Default is us-east4-a
+# Default is us-east4-c
 
 app-sql-data-disk-name = ""
 # Leave the variable value as blank if you are not using a SQL Server
