@@ -329,8 +329,8 @@ done
 
 10. Add the new production / failback disks to the Consistency Group:
 
-`gcloud compute disks add-resource-policies <REPLACE WITH SQL BOOT DISK NAME> --zone=us-east4-a --resource-policies=sql-cgroup --project=<REPLACE WITH PROD/FAILBACK PROJECT ID>`
-`gcloud compute disks add-resource-policies <REPLACE WITH SQL DATA DISK NAME> --zone=us-east4-a --resource-policies=sql-cgroup --project=<REPLACE WITH PROD/FAILBACK PROJECT ID>`
+    - `gcloud compute disks add-resource-policies <REPLACE WITH SQL BOOT DISK NAME> --zone=us-east4-a --resource-policies=sql-cgroup --project=<REPLACE WITH PROD/FAILBACK PROJECT ID>`
+    - `gcloud compute disks add-resource-policies <REPLACE WITH SQL DATA DISK NAME> --zone=us-east4-a --resource-policies=sql-cgroup --project=<REPLACE WITH PROD/FAILBACK PROJECT ID>`
 
 11. Rename `restage-dr-async-boot-disks.tf.failback` to `restage-dr-async-boot-disks.tf` and `restage-dr-async-rep.tf.failback` to `restage-dr-async-rep.tf`
 
