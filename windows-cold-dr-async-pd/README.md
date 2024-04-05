@@ -223,9 +223,9 @@ done
 
 8. Create a Consistency Group and add the DR disks to it:
 
-`gcloud compute resource-policies create disk-consistency-group sql-cgroup --region=us-central1 --project=<REPLACE WITH DR PROJECT ID>`
-`gcloud compute disks add-resource-policies <REPLACE WITH SQL BOOT DISK NAME> --zone=us-central1-a --resource-policies=sql-cgroup --project=<REPLACE WITH DR PROJECT ID>`
-`gcloud compute disks add-resource-policies <REPLACE WITH SQL DATA DISK NAME> --zone=us-central1-a --resource-policies=sql-cgroup --project=<REPLACE WITH DR PROJECT ID>`
+    - `gcloud compute resource-policies create disk-consistency-group sql-cgroup --region=us-central1 --project=<REPLACE WITH DR PROJECT ID>`
+    - `gcloud compute disks add-resource-policies <REPLACE WITH SQL BOOT DISK NAME> --zone=us-central1-a --resource-policies=sql-cgroup --project=<REPLACE WITH DR PROJECT ID>`
+    - `gcloud compute disks add-resource-policies <REPLACE WITH SQL DATA DISK NAME> --zone=us-central1-a --resource-policies=sql-cgroup --project=<REPLACE WITH DR PROJECT ID>`
 
 9. Rename `stage-failback-async-boot-disks.tf.dr` to `stage-failback-async-boot-disks.tf` and `stage-failback-async-rep.tf.dr` to `stage-failback-async-rep.tf`
 
