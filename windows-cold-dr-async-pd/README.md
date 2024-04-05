@@ -128,7 +128,7 @@ This is a critical step.  Once Async Replication has been enabled for a disk, yo
     - Async replication to DR
 
 > [!NOTE]
-> Please allow 15-20 minutes for initial replication to complete. If using your own systems with larger disks, initial replication time may be longer. The initial replication is complete when the `compute.googleapis.com/disk/async_replication/time_since_last_replication` metric is available in Cloud Monitoring for all disks.
+> Please allow 5-10 minutes for initial replication to complete. If using your own systems with larger disks, initial replication time may be longer. The initial replication is complete when the `compute.googleapis.com/disk/async_replication/time_since_last_replication` metric is available in Cloud Monitoring for all disks.
 
 ```mql
 # --- From the Service Project for Production ---
@@ -143,7 +143,8 @@ fetch gce_disk
     [value_time_since_last_replication_mean:
        mean(value.time_since_last_replication)]
 | every 1m
-| group_by [],
+| group_by
+    [resource.disk_id, metadata.system.name: metadata.system_labels.name],
     [value_time_since_last_replication_mean_aggregate:
        aggregate(value_time_since_last_replication_mean)]
 ```
@@ -233,7 +234,7 @@ done
     - `terraform apply tf.out`  
 
 > [!NOTE]
-> Please allow 15-20 minutes for initial replication to complete. If using your own systems with larger disks, initial replication time may be longer. The initial replication is complete when the `compute.googleapis.com/disk/async_replication/time_since_last_replication` metric is available in Cloud Monitoring.
+> Please allow 5-10 minutes for initial replication to complete. If using your own systems with larger disks, initial replication time may be longer. The initial replication is complete when the `compute.googleapis.com/disk/async_replication/time_since_last_replication` metric is available in Cloud Monitoring.
 
 ```mql
 # --- From the Service Project for DR ---
@@ -248,7 +249,8 @@ fetch gce_disk
     [value_time_since_last_replication_mean:
        mean(value.time_since_last_replication)]
 | every 1m
-| group_by [],
+| group_by
+    [resource.disk_id, metadata.system.name: metadata.system_labels.name],
     [value_time_since_last_replication_mean_aggregate:
        aggregate(value_time_since_last_replication_mean)]
 ```
@@ -337,7 +339,7 @@ done
     - `terraform apply tf.out`
 
 > [!NOTE]
-> Please allow 15-20 minutes for initial replication to complete. If using your own systems with larger disks, initial replication time may be longer. The initial replication is complete when the `compute.googleapis.com/disk/async_replication/time_since_last_replication` metric is available in Cloud Monitoring.
+> Please allow 5-10 minutes for initial replication to complete. If using your own systems with larger disks, initial replication time may be longer. The initial replication is complete when the `compute.googleapis.com/disk/async_replication/time_since_last_replication` metric is available in Cloud Monitoring.
 
 ```mql
 # --- From the Service Project for Production ---
@@ -352,7 +354,8 @@ fetch gce_disk
     [value_time_since_last_replication_mean:
        mean(value.time_since_last_replication)]
 | every 1m
-| group_by [],
+| group_by
+    [resource.disk_id, metadata.system.name: metadata.system_labels.name],
     [value_time_since_last_replication_mean_aggregate:
        aggregate(value_time_since_last_replication_mean)]
 ```
