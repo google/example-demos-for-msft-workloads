@@ -86,3 +86,53 @@ resource "google_compute_disk" "dr-sec-boot-disk-for-dc" {
 
   physical_block_size_bytes = 4096
 }
+
+resource "google_compute_disk" "dr-sec-boot-disk-for-sql" {
+  count = var.use-sql ? 1 : 0
+  name    = "${var.app-sql-gce-display-name}-secboot"
+  type    = var.app-sql-disk-type
+  zone    = var.app-dr-sql-zone
+  project = var.app-dr-project
+
+  guest_os_features {
+    type = "UEFI_COMPATIBLE"
+  }
+
+  guest_os_features {
+    type = "MULTI_IP_SUBNET"
+  }
+
+  guest_os_features {
+    type = "VIRTIO_SCSI_MULTIQUEUE"
+  }
+
+  guest_os_features {
+    type = "GVNIC"
+  }
+
+  guest_os_features {
+    type = "WINDOWS"
+  }
+
+  licenses = ["projects/windows-sql-cloud/global/licenses/sql-server-2022-web","projects/windows-cloud/global/licenses/windows-server-2022-dc"]
+
+  async_primary_disk {
+    disk = "projects/${var.app-prod-project}/zones/${var.app-prod-sql-zone}/disks/${var.app-sql-gce-display-name}"
+  }
+
+  physical_block_size_bytes = 4096
+}
+
+resource "google_compute_disk" "dr-sec-data-disk-for-sql" {
+  count = var.use-sql ? 1 : 0
+  name    = "${var.app-sql-data-disk-name}-secboot"
+  type    = var.app-sql-disk-type
+  zone    = var.app-dr-sql-zone
+  project = var.app-dr-project
+
+  async_primary_disk {
+    disk = "projects/${var.app-prod-project}/zones/${var.app-prod-sql-zone}/disks/${var.app-sql-data-disk-name}"
+  }
+
+  physical_block_size_bytes = 4096
+}

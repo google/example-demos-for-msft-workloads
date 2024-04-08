@@ -19,16 +19,16 @@ Locals are used in each folder for ease of manipulation.  These can be extracted
 ![Windows Cold DR with PD Async Replication](./images/Windows%20Cold%20DR%20Architecture.png)
 
 ## Setup Folder
-Contains code to spin up 10 Windows Server servers and join them to a domain, create DR boot disks for all 10 and the domain controller (if using) in the DR region, and create the asynchronous replication pairs for all disks.  The code is written to preserve IP addresses.
+Contains code to spin up 10 Windows Server servers and join them to a domain, create DR boot disks for all 10, the domain controller (if using), the MS SQL Server (if using) in the DR region, and create the asynchronous replication pairs for all disks.  The code is written to preserve IP addresses.
 
 ## DR Folder
-Contains code to spin up DR servers using the replicated disks and IP addresses from production (including the domain controller), create failback boot disks in the production region, and create the failback async replication pairs for all disks.  The IP addresses are preserved for failback.
+Contains code to spin up DR servers using the replicated disks and IP addresses from production (including the domain controller and MS SQL Server), create failback boot disks in the production region, and create the failback async replication pairs for all disks.  The IP addresses are preserved for failback.
 
 ## Failback Folder
 Contains code to spin up failback/production servers using the replicated disks and IP addresses from DR, and includes code to recreate DR boot disks and async replication pairs to prepare for the next DR event.
 
 # How to Setup the Environment
-As of 01/2024, this repo does not contain the code necessary to build out an entire environment.  Some general steps and guidelines are provided here in order to help with this demo.
+As of 01/2024, this repo does not contain the code necessary to build out an entire environment (coming soon!).  Some general steps and guidelines are provided here in order to help with this demo.
 
 > [!NOTE]
 > These instructions assume that you are building out the same environment as shown in the Architecture diagram
@@ -96,15 +96,25 @@ gcloud compute networks peerings list \
     - More info on Cloud DNS can be found [here](https://cloud.google.com/dns/docs/best-practices).
 7. **_Optional_** If you wish to test with an Active Directory Domain, you can set up a [Domain Controller](https://cloud.google.com/architecture/deploy-an-active-directory-forest-on-compute-engine#deploy_the_active_directory_forest) in the Production Project using the `app-prod` VPC
 
+8. **_Optional_** If you wish to test with a SQL Server, you can set up a [SQL Server](https://cloud.google.com/compute/docs/instances/sql-server/creating-sql-server-instances#start_sql_instance) in the Production Project using the `app-prod` VPC, with a second data disk attached.
+
+9. **_Optional_** If using a SQL Server, you will need to create a Consistency Group for the boot and data disks, then add the disks to it:
+
+    - `gcloud compute resource-policies create disk-consistency-group sql-cgroup --region=us-east4 --project=<REPLACE WITH PROD/FAILBACK PROJECT ID>`
+    - `gcloud compute disks add-resource-policies <REPLACE WITH SQL BOOT DISK NAME> --zone=us-east4-a --resource-policies=sql-cgroup --project=<REPLACE WITH PROD/FAILBACK PROJECT ID>`
+    - `gcloud compute disks add-resource-policies <REPLACE WITH SQL DATA DISK NAME> --zone=us-east4-a --resource-policies=sql-cgroup --project=<REPLACE WITH PROD/FAILBACK PROJECT ID>`
+
+This is a critical step.  Once Async Replication has been enabled for a disk, you cannot add it to a consistency group.
+
 # Building The Test Servers
 
 > [!IMPORTANT]
-> If you are not using a Domain Controller to test, please ensure that the `use-domain-controller` variable in `terraform.tfvars` is set to `false`
+> If you are not using a Domain Controller or a SQL Server to test, please ensure that the `use-domain-controller` and `use-sql` variables in `terraform.tfvars` are set to `false`
 
 1. [Create an Instance template](https://cloud.google.com/compute/docs/instance-templates/create-instance-templates) in the Service Project for Production
     - A sample `gcloud` command has been provided in the **/setup/templatefiles** folder for your convenience
 
-2. Navigate to the **/setup** folder and update the `terraform.tfvars` file with the appropriate variables for your environment
+2. Navigate to the **/setup** folder and rename `terraform.tfvars.sample` to `terraform.tfvars`. Update the file with the appropriate variables for your environment
     - If you are using a Domain Controller, navigate to the **/setup/templatefiles** folder and update `ad-join.tpl` with your values. 
 
 3. While in the **/setup** directory run the terraform commands
@@ -118,7 +128,7 @@ gcloud compute networks peerings list \
     - Async replication to DR
 
 > [!NOTE]
-> Please allow 15-20 minutes for initial replication to complete. If using your own systems with larger disks, initial replication time may be longer. The initial replication is complete when the `compute.googleapis.com/disk/async_replication/time_since_last_replication` metric is available in Cloud Monitoring.
+> Please allow 5-10 minutes for initial replication to complete. If using your own systems with larger disks, initial replication time may be longer. The initial replication is complete when the `compute.googleapis.com/disk/async_replication/time_since_last_replication` metric is available in Cloud Monitoring for all disks.
 
 ```mql
 # --- From the Service Project for Production ---
@@ -133,15 +143,18 @@ fetch gce_disk
     [value_time_since_last_replication_mean:
        mean(value.time_since_last_replication)]
 | every 1m
-| group_by [],
+| group_by
+    [resource.disk_id, metadata.system.name: metadata.system_labels.name],
     [value_time_since_last_replication_mean_aggregate:
        aggregate(value_time_since_last_replication_mean)]
 ```
 
+4. **_Optional_** Navigate to the **/dr** folder and populate the terraform.tfvars values to prepare for a disaster scenario
+
 # DR Failover
 
 > [!IMPORTANT]
-> If you are not using a Domain Controller to test, please ensure that the `use-domain-controller` variable in `terraform.tfvars` is set to `false`
+> If you are not using a Domain Controller or a SQL Server to test, please ensure that the `use-domain-controller` and `use-sql` variables in `terraform.tfvars` are set to `false`
 
 1. Simulate a DR event (e.g. shut down the production VMs)
 
@@ -188,7 +201,7 @@ gcloud compute networks peerings list \
 --format="table(peerings.name,peerings.state)"
 ```
 
-4. Navigate to the **/dr** folder and update the `terraform.tfvars` file with the appropriate variables for your environment
+4. Navigate to the **/dr** folder and update the `terraform.tfvars` file with the appropriate variables for your environment if not already populated
 
 5. While in the **/dr** folder, run the terraform commands to create the DR VMs using the replicated disks from Production
     - `terraform init` 
@@ -208,14 +221,20 @@ do
 done
 ```
 
-8. Rename `stage-failback-async-boot-disks.tf.dr` to `stage-failback-async-boot-disks.tf` and `stage-failback-async-rep.tf.dr` to `stage-failback-async-rep.tf`
+8. Create a Consistency Group and add the DR disks to it:
 
-9. While in the **/dr** folder, run the terraform commands to create new boot disks in the Production region for failback, and the associated async replication pairs from DR
+    - `gcloud compute resource-policies create disk-consistency-group sql-cgroup --region=us-central1 --project=<REPLACE WITH DR PROJECT ID>`
+    - `gcloud compute disks add-resource-policies <REPLACE WITH SQL BOOT DISK NAME> --zone=us-central1-a --resource-policies=sql-cgroup --project=<REPLACE WITH DR PROJECT ID>`
+    - `gcloud compute disks add-resource-policies <REPLACE WITH SQL DATA DISK NAME> --zone=us-central1-a --resource-policies=sql-cgroup --project=<REPLACE WITH DR PROJECT ID>`
+
+9. Rename `stage-failback-async-boot-disks.tf.dr` to `stage-failback-async-boot-disks.tf` and `stage-failback-async-rep.tf.dr` to `stage-failback-async-rep.tf`
+
+10. While in the **/dr** folder, run the terraform commands to create new boot disks in the Production region for failback, and the associated async replication pairs from DR
     - `terraform plan -out tf.out` (should see 22 resources to add)
     - `terraform apply tf.out`  
 
 > [!NOTE]
-> Please allow 15-20 minutes for initial replication to complete. If using your own systems with larger disks, initial replication time may be longer. The initial replication is complete when the `compute.googleapis.com/disk/async_replication/time_since_last_replication` metric is available in Cloud Monitoring.
+> Please allow 5-10 minutes for initial replication to complete. If using your own systems with larger disks, initial replication time may be longer. The initial replication is complete when the `compute.googleapis.com/disk/async_replication/time_since_last_replication` metric is available in Cloud Monitoring.
 
 ```mql
 # --- From the Service Project for DR ---
@@ -230,21 +249,22 @@ fetch gce_disk
     [value_time_since_last_replication_mean:
        mean(value.time_since_last_replication)]
 | every 1m
-| group_by [],
+| group_by
+    [resource.disk_id, metadata.system.name: metadata.system_labels.name],
     [value_time_since_last_replication_mean_aggregate:
        aggregate(value_time_since_last_replication_mean)]
 ```
 
-10. Navigate to the **/failback** folder and update the `terraform.tfvars` file with the appropriate variables for your environment to prepare for production failback
+11. Navigate to the **/failback** folder and update the `terraform.tfvars` file with the appropriate variables for your environment to prepare for production failback
 
-11. **_Optional_** While in the **/failback** folder, run the terraform commands to prepare for failback
+12. **_Optional_** While in the **/failback** folder, run the terraform commands to prepare for failback
     - `terraform init` 
     - `terraform plan -out tf.out` (there should be 10 or 11 resources to create)
 
 # Production Failback
 
 > [!IMPORTANT]
-> If you are not using a Domain Controller to test, please ensure that the `use-domain-controller` variable in `terraform.tfvars` is set to `false`
+> If you are not using a Domain Controller or a SQL Server to test, please ensure that the `use-domain-controller` and `use-sql` variables in `terraform.tfvars` are set to `false`
 
 1. Shut down DR VMs
 
@@ -307,14 +327,19 @@ do
 done
 ```
 
-10. Rename `restage-dr-async-boot-disks.tf.failback` to `restage-dr-async-boot-disks.tf` and `restage-dr-async-rep.tf.failback` to `restage-dr-async-rep.tf`
+10. Add the new production / failback disks to the Consistency Group:
 
-11. While in the **/failback** folder, run the terraform commands to re-create new boot disks in the DR region, and the associated async replication pairs to prepare for the next DR event
+    - `gcloud compute disks add-resource-policies <REPLACE WITH SQL BOOT DISK NAME> --zone=us-east4-a --resource-policies=sql-cgroup --project=<REPLACE WITH PROD/FAILBACK PROJECT ID>`
+    - `gcloud compute disks add-resource-policies <REPLACE WITH SQL DATA DISK NAME> --zone=us-east4-a --resource-policies=sql-cgroup --project=<REPLACE WITH PROD/FAILBACK PROJECT ID>`
+
+11. Rename `restage-dr-async-boot-disks.tf.failback` to `restage-dr-async-boot-disks.tf` and `restage-dr-async-rep.tf.failback` to `restage-dr-async-rep.tf`
+
+12. While in the **/failback** folder, run the terraform commands to re-create new boot disks in the DR region, and the associated async replication pairs to prepare for the next DR event
     - `terraform plan -out tf.out` (should see 20 or 22 resources to add)
     - `terraform apply tf.out`
 
 > [!NOTE]
-> Please allow 15-20 minutes for initial replication to complete. If using your own systems with larger disks, initial replication time may be longer. The initial replication is complete when the `compute.googleapis.com/disk/async_replication/time_since_last_replication` metric is available in Cloud Monitoring.
+> Please allow 5-10 minutes for initial replication to complete. If using your own systems with larger disks, initial replication time may be longer. The initial replication is complete when the `compute.googleapis.com/disk/async_replication/time_since_last_replication` metric is available in Cloud Monitoring.
 
 ```mql
 # --- From the Service Project for Production ---
@@ -329,7 +354,8 @@ fetch gce_disk
     [value_time_since_last_replication_mean:
        mean(value.time_since_last_replication)]
 | every 1m
-| group_by [],
+| group_by
+    [resource.disk_id, metadata.system.name: metadata.system_labels.name],
     [value_time_since_last_replication_mean_aggregate:
        aggregate(value_time_since_last_replication_mean)]
 ```

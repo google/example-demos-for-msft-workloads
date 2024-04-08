@@ -23,6 +23,11 @@ variable "use-domain-controller" {
   description = "Set value to TRUE if you plan to manually build a Domain Controller as part of the demo. The default value will be set to FALSE"
 }
 
+variable "use-sql" {
+  type = bool
+  description = "Set value to TRUE if you plan to manually build a SQL Server as part of the demo. The default value will be set to FALSE"
+}
+
 variable "app-prod-project" {
   type        = string
   description = "The production project"
@@ -68,6 +73,31 @@ variable "app-prod-dc-zone" {
   description = "The production zone to contain the domain controller"
 }
 
+variable "app-sql-gce-display-name" {
+  type = string
+  description = "The GCE display name of the SQL Server instance"
+}
+
+variable "app-prod-sql-disk-selflink" {
+  type = string
+  description = "The selflink of the production SQL Server boot disk"
+}
+
+variable "app-sql-disk-type" {
+  type = string
+  description = "The persistent disk type of the SQL Server disks"
+}
+
+variable "app-prod-sql-zone" {
+  type = string
+  description = "The production zone for the SQL Server"
+}
+
+variable "app-sql-data-disk-name" {
+  type = string
+  description = "The failback/production SQL Server data disk name"
+}
+
 ####################
 ### DR Variables ###
 ####################
@@ -84,4 +114,9 @@ variable "app-dr-region" {
 variable "app-dr-dc-zone" {
   type        = string
   description = "The DR zone to contain the domain controller boot disk"
+}
+
+variable "app-dr-sql-zone" {
+  type = string
+  description = "The DR zone to contain the SQL Server"
 }

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
  
-resource "google_compute_disk_async_replication" "failback-async-replication" {
+resource "google_compute_disk_async_replication" "failback-async-replication-for-app-servers" {
   for_each     = local.sec_boot_disks_for_failback
   depends_on   = [google_compute_disk.failback-sec-boot-disks-for-app-vms]
   primary_disk = "projects/${var.app-dr-project}/zones/${each.value.dr_disk_zone}/disks/${each.value.dr_disk}"
@@ -29,5 +29,23 @@ resource "google_compute_disk_async_replication" "failback-async-replication-for
   primary_disk = "projects/${var.app-dr-project}/zones/${var.app-dr-dc-zone}/disks/${var.app-dc-gce-display-name}-secboot"
   secondary_disk {
     disk = google_compute_disk.failback-sec-boot-disk-for-dc[count.index].id
+  }
+}
+
+resource "google_compute_disk_async_replication" "failback-async-replication-for-sql-boot" {
+  count = var.use-sql ? 1 : 0
+  depends_on   = [google_compute_disk.failback-sec-boot-disk-for-sql]
+  primary_disk = "projects/${var.app-dr-project}/zones/${var.app-dr-sql-zone}/disks/${var.app-sql-gce-display-name}-secboot"
+  secondary_disk {
+    disk = google_compute_disk.failback-sec-boot-disk-for-sql[count.index].id
+  }
+}
+
+resource "google_compute_disk_async_replication" "failback-async-replication-for-sql-data" {
+  count = var.use-sql ? 1 : 0
+  depends_on   = [google_compute_disk.failback-sec-boot-disk-for-sql]
+  primary_disk = "projects/${var.app-dr-project}/zones/${var.app-dr-sql-zone}/disks/${var.app-sql-data-disk-name}-secboot"
+  secondary_disk {
+    disk = google_compute_disk.failback-sec-data-disk-for-sql[count.index].id
   }
 }

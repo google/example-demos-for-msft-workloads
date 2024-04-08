@@ -31,6 +31,10 @@ use-domain-controller = false
 # Default value is FALSE
 # Set value to TRUE if you plan to manually build a Domain Controller as part of the demo
 
+use-sql = false
+# Default value is FALSE
+# Set value to TRUE if you plan to manually build a SQL Server as part of the demo
+
 app-prod-project = "REPLACE_WITH_SERVICE_PROJECT_FOR_PRODUCTION_PROJECT_ID"
 
 app-prod-region = "REPLACE_WITH_PRODUCTION_REGION"
@@ -54,7 +58,7 @@ app-dc-gce-display-name = ""
 app-prod-dc-disk-selflink = ""
 # Leave the variable value as blank if you are not using a Domain Controller
 # Run this gcloud command to get the self link
-# > gcloud compute disks describe <ENTER APP PROD DC GCE DISPLAY NAME> --zone=us-east4-c --project=$app_prod_project --format="value(selfLink)"
+# > gcloud compute disks describe <ENTER APP PROD DC GCE DISPLAY NAME> --zone=<ENTER DC PROD ZONE> --project=$app_prod_project --format="value(selfLink)"
 
 app-dc-disk-type = ""
 # Leave the variable value as blank if you are not using a Domain Controller
@@ -62,7 +66,26 @@ app-dc-disk-type = ""
 
 app-prod-dc-zone = ""
 # Leave the variable value as blank if you are not using a Domain Controller
-# Default is us-east4
+# Default is us-east4-c
+
+app-sql-gce-display-name = ""
+# Leave the variable value as blank if you are not using a SQL Server
+
+app-prod-sql-disk-selflink = ""
+# Leave the variable value as blank if you are not using a SQL Server
+# Run this gcloud command to get the self link
+# > gcloud compute disks describe <ENTER APP-SQL-GCE-DISPLAY-NAME> --zone=<ENTER SQL PROD ZONE> --project=$app_prod_project --format="value(selfLink)"
+
+app-sql-disk-type = ""
+# Leave the variable value as blank if you are not using a SQL Server
+# Default is pd-balanced
+
+app-prod-sql-zone = ""
+# Leave the variable value as blank if you are not using a SQL Server
+# Default is us-east4-c
+
+app-sql-data-disk-name = ""
+# Leave the variable value as blank if you are not using a SQL Server
 
 ####################
 ### DR Variables ###
@@ -74,4 +97,8 @@ app-dr-region = "REPLACE_WITH_DR_REGION"
 
 app-dr-dc-zone = ""
 # Leave the variable value as blank if you are not using a Domain Controller
+# Default is us-central1-a
+
+app-dr-sql-zone = ""
+# Leave the variable value as blank if you are not using a SQL Server
 # Default is us-central1-a

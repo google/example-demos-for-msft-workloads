@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-resource "google_compute_disk_async_replication" "dr-async-replication" {
+resource "google_compute_disk_async_replication" "dr-async-replication-for-app-servers" {
   for_each     = local.sec_boot_disks_for_dr
   depends_on   = [google_compute_disk.dr-sec-boot-disks-for-app-vms]
   primary_disk = "projects/${var.app-prod-project}/zones/${each.value.prim_disk_zone}/disks/${each.value.prim_disk}"
@@ -29,5 +29,23 @@ resource "google_compute_disk_async_replication" "dr-async-replication-for-dc" {
   primary_disk = var.app-prod-dc-disk-selflink
   secondary_disk {
     disk = google_compute_disk.dr-sec-boot-disk-for-dc[count.index].id
+  }
+}
+
+resource "google_compute_disk_async_replication" "dr-async-replication-for-sql-boot" {
+  count = var.use-sql ? 1 : 0
+  depends_on   = [google_compute_disk.dr-sec-boot-disk-for-sql]
+  primary_disk = "projects/${var.app-prod-project}/zones/${var.app-prod-sql-zone}/disks/${var.app-sql-gce-display-name}"
+  secondary_disk {
+    disk = google_compute_disk.dr-sec-boot-disk-for-sql[count.index].id
+  }
+}
+
+resource "google_compute_disk_async_replication" "dr-async-replication-for-sql-data" {
+  count = var.use-sql ? 1 : 0
+  depends_on   = [google_compute_disk.dr-sec-data-disk-for-sql]
+  primary_disk = "projects/${var.app-prod-project}/zones/${var.app-prod-sql-zone}/disks/${var.app-sql-data-disk-name}"
+  secondary_disk {
+    disk = google_compute_disk.dr-sec-data-disk-for-sql[count.index].id
   }
 }

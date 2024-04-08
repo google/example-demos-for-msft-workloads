@@ -76,3 +76,39 @@ resource "google_compute_instance" "failback-vms" {
   allow_stopping_for_update = true
 
 }
+
+resource "google_compute_instance" "failback-sql" {
+  count = var.use-sql ? 1 : 0
+  depends_on   = [google_compute_instance.failback-dc]
+  name         = var.app-sql-gce-display-name
+  machine_type = var.app-sql-machine-type
+  zone         = var.app-prod-sql-zone
+  project      = var.app-prod-project
+
+  boot_disk {
+    source = "projects/${var.app-prod-project}/zones/${var.app-prod-sql-zone}/disks/${var.app-sql-gce-display-name}-failback"
+  }
+
+  attached_disk {
+    source = "projects/${var.app-prod-project}/zones/${var.app-prod-sql-zone}/disks/${var.app-sql-data-disk-name}-failback"
+  }
+
+  network_interface {
+    subnetwork = var.app-prod-ip-subnet-self-link
+    network_ip = var.app-prod-sql-ip
+  }
+
+  shielded_instance_config {
+    enable_secure_boot          = true
+    enable_vtpm                 = true
+    enable_integrity_monitoring = true
+  }
+
+  service_account {
+    email  = var.app-prod-service-account
+    scopes = ["cloud-platform"]
+  }
+
+  allow_stopping_for_update = true
+
+}
